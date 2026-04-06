@@ -1,0 +1,13 @@
+/* GitTrack - Custom styles */
+
+/* SVG animation for consistency circle */
+@keyframes circle-draw {
+  from {
+    stroke-dashoffset: 251.2;
+  }
+}
+
+/* Heatmap cell hover glow */
+.heatmap-cell:hover {
+  filter: brightness(1.2);
+}
