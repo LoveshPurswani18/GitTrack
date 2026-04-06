@@ -1,11 +1,3 @@
-// export default function Dashboard() {
-//   return (
-//     <div className="min-h-screen bg-black text-white p-10">
-//       Dashboard working
-//     </div>
-//   );
-// }
-
 import Header from '../components/Header';
 import StreakCard from '../components/StreakCard';
 import TodayCard from '../components/TodayCard';
