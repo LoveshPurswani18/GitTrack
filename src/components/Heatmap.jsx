@@ -11,9 +11,9 @@ export default function Heatmap({ dailyData }) {
     <Card
       data-testid="heatmap-card"
       className="border-slate-200 dark:border-slate-800/80
-        bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg"
+        bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg col-span-full"
     >
-      <CardContent className="p-6">
+      <CardContent className="p-6 md:p-7 lg:p-8">
         {/* Header row */}
         <div className="flex items-center justify-between mb-5">
           <h3 className="font-mono font-bold text-base text-slate-900 dark:text-white tracking-tight">
@@ -33,7 +33,7 @@ export default function Heatmap({ dailyData }) {
 
         {/* Heatmap Grid: 3 rows x 10 columns */}
         <TooltipProvider delayDuration={100}>
-          <div className="grid grid-cols-10 gap-1.5 md:gap-2">
+          <div className="grid grid-cols-10 md:grid-cols-15 lg:grid-cols-30 gap-1.5 md:gap-2 w-full">
             {dailyData.map((day, i) => {
               const level = getHeatmapLevel(day.commits);
               return (
@@ -42,7 +42,7 @@ export default function Heatmap({ dailyData }) {
                     <div
                       data-testid={`heatmap-cell-${i}`}
                       className={`aspect-square rounded-sm cursor-pointer
-                        transition-all duration-200 hover:scale-110 hover:ring-2 hover:ring-git-green/40
+                        transition-all duration-200 hover:scale-105 hover:ring-2 hover:ring-git-green/40
                         ${colors[level]}`}
                     />
                   </TooltipTrigger>

@@ -77,7 +77,7 @@ const weeklyData = getWeeklyData();
 const weeklyActiveDays = weeklyData.filter(d => d.active).length;
 
 export const mockData = {
-  username: 'dev_curator',
+  login: 'LoveshPurswani18',
   avatarUrl: 'https://images.unsplash.com/photo-1566753323558-f4e0952af115?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwyfHx0ZWNoJTIwZGV2ZWxvcGVyJTIwYXZhdGFyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzc1NTA4MTc1fDA&ixlib=rb-4.1.0&q=85&w=80&h=80',
   lastUpdated: '5 mins ago',
   currentStreak: 8,

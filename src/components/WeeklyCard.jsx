@@ -1,51 +1,54 @@
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent } from "../components/ui/card";
 
-export default function WeeklyCard({ weeklyData, weeklyActiveDays, weeklyConsistencyPercent }) {
+export default function WeeklyCard({
+  weeklyData,
+  weeklyActiveDays,
+  weeklyConsistencyPercent,
+}) {
   return (
     <Card
-      data-testid="weekly-card"
-      className="relative overflow-hidden border-slate-200 dark:border-slate-800/80
-        bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg"
+      className="border-slate-200 dark:border-slate-800/80
+    bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg"
     >
       <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Weekly Consistency
-            </p>
-            <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
-              {weeklyActiveDays} / 7 days coded
-            </p>
-          </div>
-          <span
-            data-testid="weekly-percent"
-            className="text-xl font-mono font-bold text-git-green"
-          >
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs uppercase tracking-wider text-slate-500">
+            Weekly Consistency
+          </p>
+
+          <span className="text-sm font-semibold text-git-green">
             {weeklyConsistencyPercent}%
           </span>
         </div>
 
+        <p className="text-sm text-slate-400 mb-4">
+          {weeklyActiveDays} / 7 days coded
+        </p>
+
         {/* Progress bar */}
-        <div className="mt-3 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700/60 overflow-hidden">
+        <div className="w-full h-1.5 bg-slate-800 rounded-full mb-4">
           <div
-            className="h-full rounded-full bg-git-green transition-all duration-700"
+            className="h-full bg-git-green rounded-full transition-all"
             style={{ width: `${weeklyConsistencyPercent}%` }}
           />
         </div>
 
-        {/* Day indicators */}
-        <div className="mt-4 flex items-center justify-between gap-1">
-          {weeklyData.map((day, i) => (
+        {/* days */}
+        <div className="flex justify-between gap-1">
+          {(weeklyData || []).slice(0, 7).map((day, i) => (
             <div
               key={i}
-              data-testid={`weekly-day-${i}`}
-              className={`flex items-center justify-center w-9 h-9 rounded-full text-xs font-semibold transition-colors
-                ${day.active
-                  ? 'bg-git-green text-white'
-                  : 'bg-slate-100 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500'
-                }`}
+              className={`
+        w-8 h-8 rounded-md flex items-center justify-center
+        text-xs font-semibold transition-all
+        ${
+          day?.commits > 0
+            ? "bg-git-green text-slate-900"
+            : "bg-slate-800/60 text-slate-500"
+        }
+      `}
             >
-              {day.label}
+              {["M", "T", "W", "T", "F", "S", "S"][i]}
             </div>
           ))}
         </div>
