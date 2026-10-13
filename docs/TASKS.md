@@ -21,10 +21,10 @@ me to do them.
 ## Phase 1 — Foundation and data
 
 ### 1.1 Design tokens and app shell · `feat/shell`
-- [ ] Tokens from DESIGN.md §3 in `globals.css` (light, dark, `data-theme` override) + `@theme inline`
-- [ ] Geist and Geist Mono via `next/font`; tabular numbers utility
-- [ ] `layout.tsx`: `AppHeader` (logo, Dashboard/Profile nav, ThemeToggle, avatar placeholder), no-flash theme script
-- [ ] Favicon from `public/icon.svg`; page titles
+- [x] Tokens from DESIGN.md §3 in `globals.css` (light, dark, `data-theme` override) + `@theme inline`
+- [x] Geist and Geist Mono via `next/font`; tabular numbers utility
+- [x] `layout.tsx`: `AppHeader` (logo, Dashboard/Profile nav, ThemeToggle, avatar placeholder), no-flash theme script
+- [x] Favicon from `public/icon.svg`; page titles
 - **Done when:** empty dashboard and profile routes render the header correctly in both themes at 390 and 1280 px; lint and build pass.
 
 ### 1.2 Types, config and fixtures · `feat/fixtures`
