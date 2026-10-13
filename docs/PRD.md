@@ -1,6 +1,6 @@
 # GitTrack v2 — MVP PRD
 
-Oct 11, 2026 · @Lavesh.Dev
+Oct 13, 2026 · @Lavesh.Dev
 
 ## Overview
 
@@ -29,8 +29,8 @@ Days 1–2 answer one question before any UI is built: can the GitHub API give e
 
 | # | Check | Pass criteria |
 | --- | --- | --- |
-| 1 | Daily commit counts | In UTC mode, commit counts match my GitHub profile graph on 30 random days |
-| 2 | Streaks | Current and longest streak match a manual count from the profile (UTC mode) |
+| 1 | Daily commit counts | In IST, commit counts match my GitHub profile graph on 30 random days |
+| 2 | Streaks | Current and longest streak match a manual count from the profile (IST) |
 | 3 | Private repos | Private repo commits are included |
 | 4 | WhatBuilds org repos | Org commits are included; the token can read them (SSO authorized if required) |
 | 5 | Attribution | Recent work commits link to my profile (author email on my account) |
@@ -40,6 +40,8 @@ Days 1–2 answer one question before any UI is built: can the GitHub API give e
 | 9 | Speed | A one-year fetch completes in a few seconds and can be cached |
 
 **Go:** all checks pass → build on this data layer. **No-go:** any check fails → record which and why, then decide whether a second data source is needed before Phase 1.
+
+**Result (13 Oct): Go.** All 9 checks passed. GitHub places each commit on its local date (IST for me), not its UTC date. Grouped by IST author date, the REST commits match my profile on 357 of 362 compared days. The other 10 commits (about 4%) are ones GitHub still credits after a rebase or force-push, so the app shows slightly fewer on those days. Merged PRs match GitHub search exactly. A year's fetch took 5.95 seconds before caching, just over the 5 second guideline, so caching is required. Checks 5 and 6 (attribution, PR counts against GitHub search) were verified by hand.
 
 ## MVP scope
 
@@ -52,7 +54,7 @@ The MVP is a dashboard page, with a timezone switcher, a range selector and a pe
 | Timezone switcher | Any IANA timezone, defaulting to the browser's; all days, streaks and "today" follow it | Must |
 | Streaks | Current and longest streak of active days | Must |
 | Summary stats | Commits today, this week vs last week, total for the range | Must |
-| Pull requests | Opened, open now and merged for the range, plus recent PRs with title, repo and status; work PRs carry a "Work" tag | Must |
+| Pull requests | Opened, open now and merged for the range, plus recent PRs with title, repo and status (open, merged or closed); work PRs carry a "Work" tag | Must |
 | Commits by project | Per-repo counts for every repo; WhatBuilds repos are named and carry a "Work" tag | Must |
 | Personal / work filter | All, personal only, or work only, applied to every metric | Must |
 | Refresh and states | Cached data with a manual refresh, plus clear loading, empty, rate-limit and token-error states | Must |
@@ -65,7 +67,7 @@ The MVP is a dashboard page, with a timezone switcher, a range selector and a pe
 
 ## Metric definitions
 
-Every metric follows GitHub's own counting rules, so in UTC mode the numbers can be checked against my profile.
+Every metric follows GitHub's own counting rules, so in IST the numbers can be checked against my profile. GitHub dates each commit by its author time in my local timezone, which is IST.
 
 | Term | Definition |
 | --- | --- |
@@ -77,7 +79,7 @@ Every metric follows GitHub's own counting rules, so in UTC mode the numbers can
 | PR merged | One of those PRs, counted on its merge day |
 | Personal repo | Any repo not owned by the WhatBuilds org |
 | Work repo | Any repo owned by the WhatBuilds org; shown by name with a "Work" tag, including PR titles and statuses |
-| Day | A calendar day in the selected timezone, computed from each event's UTC timestamp |
+| Day | A calendar day in the selected timezone, computed from each commit's author timestamp (UTC); the IST view matches my GitHub profile |
 
 Commits on feature branches appear only after they are merged into the default branch.
 
@@ -89,7 +91,7 @@ A single Next.js app with TypeScript, deployed on Vercel, with no database: the 
 
 Raw events are timezone-free, so switching timezone, range or filter never triggers a new GitHub call.
 
-- **Data sources:** GraphQL `contributionsCollection` lists the repos with my commits and my PRs with their timestamps; the REST commits API returns exact commit times per active repo on the default branch, filtered to my author.
+- **Data sources:** GraphQL `contributionsCollection` lists the repos with my commits, my PRs with their timestamps, and per-day counts used only as a cross-check. The REST commits API is the single source of commit counts: exact author times per active repo on the default branch, filtered to my author.
 - **Token:** one dedicated classic personal access token with `repo` and `read:org`, SSO-authorized for WhatBuilds if needed, separate from my gh CLI login. Stored in a server-only environment variable, never prefixed `NEXT_PUBLIC_`.
 - **Caching:** server-side cache of 10–15 minutes, plus a manual refresh. Rate limits are not a concern for one user with caching.
 - **Work repos:** WhatBuilds repos are flagged as work on the server and shown by name, with their PR titles and statuses, like personal repos.
@@ -106,7 +108,7 @@ Each phase starts in Claude Code plan mode from this PRD, with `CLAUDE.md` holdi
 
 **The MVP succeeds when:**
 
-1. **Accuracy:** in UTC mode, daily commit counts and streaks match my GitHub profile on 30 random days.
+1. **Accuracy:** in IST, daily commit counts and streaks match my GitHub profile on 30 random days, except days where commits were rebased away (spike: 357 of 362 compared days exact).
 2. **Speed:** the dashboard loads in under 2 seconds from cache.
 3. **Usage:** I open it on most days for the two weeks after launch.
 4. **Learning:** the whole cycle — spec, plan, build, test, deploy — was done with Claude Code.
@@ -119,15 +121,15 @@ The biggest risk is the data layer, which is why the spike comes first; the rest
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Commit counts don't match the profile | Core promise fails | Spike check 1; investigate before any UI work |
+| Commit counts don't match the profile | Core promise fails | Passed in the spike (13 Oct). The remaining 4% gap is rebased commits GitHub still credits; accepted |
 | WhatBuilds blocks or hasn't authorized the token | Work commits silently missing | Spike check 4; authorize SSO or ask an org admin |
 | No auth on the deployed URL | Anyone with the link sees my activity, repo names and PR titles, including WhatBuilds repos | Accepted for the MVP (decided 12 Oct); auth is the first post-MVP item; keep the URL unshared; confirm WhatBuilds is fine with its repo names and PR titles shown |
 | Classic token has write access | A leak could modify repos | Server-only env var, dedicated token, revocable without affecting my gh CLI login |
-| A year of commit fetches is slow | Slow first load | Spike check 9; cache results; fetch only repos with activity |
+| A year of commit fetches is slow | Slow first load | Spike: 5.95 s uncached for a year, over the 5 s guideline; cache results, fetch only repos with activity, in parallel |
 
 **Open questions**
 
-- Does the REST commits API, filtered to default branches, reproduce GitHub's commit counts exactly? (Answered by the spike.)
+- None open. Answered 13 Oct: the REST commits API reproduces GitHub's counts in IST on 357 of 362 compared days; the 10-commit gap is commits rebased off the default branch, and the app counts only what is on it.
 
 **After the MVP, in order**
 
