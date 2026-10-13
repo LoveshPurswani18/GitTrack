@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" role="img" aria-label="GitTrack">
+  <g fill="#f8fafc">
+    <rect x="0" y="0" width="12" height="12" rx="3" fill-opacity="0.25"/>
+    <rect x="16" y="0" width="12" height="12" rx="3" fill-opacity="0.5"/>
+    <rect x="32" y="0" width="12" height="12" rx="3"/>
+    <rect x="0" y="16" width="12" height="12" rx="3" fill-opacity="0.5"/>
+    <rect x="16" y="16" width="12" height="12" rx="3"/>
+    <rect x="32" y="16" width="12" height="12" rx="3" fill-opacity="0.5"/>
+    <rect x="0" y="32" width="12" height="12" rx="3"/>
+    <rect x="16" y="32" width="12" height="12" rx="3" fill-opacity="0.5"/>
+    <rect x="32" y="32" width="12" height="12" rx="3" fill-opacity="0.25"/>
+  </g>
+</svg>
