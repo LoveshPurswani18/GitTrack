@@ -114,4 +114,4 @@ tools → `/git-track` session logging + database → branch tracking and goals.
 
 Ideas that come up during the build go here instead of into the current task.
 
--
+- [ ] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default)
