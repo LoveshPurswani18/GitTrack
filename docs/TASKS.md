@@ -28,12 +28,12 @@ me to do them.
 - **Done when:** empty dashboard and profile routes render the header correctly in both themes at 390 and 1280 px; lint and build pass.
 
 ### 1.2 Types, config and fixtures · `feat/fixtures`
-- [ ] Install and configure Vitest; add the `npm test` script
-- [ ] `src/types/activity.ts` and `profile.ts` exactly as ARCHITECTURE.md §5
-- [ ] `src/lib/config.ts`: reads and validates env vars; `GITHUB_DATA` defaults to `fixtures`
-- [ ] `fixtures/activity.json` (relative dates), `activity-empty.json`, `profile.json`, as ARCHITECTURE.md §12
-- [ ] `fixtures.ts` resolves relative dates; `GITHUB_FIXTURE_STATE` for empty, rate_limit and token_error
-- [ ] `getActivity()` and `getProfile()` in `lib/github/index.ts`, fixtures path only for now
+- [x] Install and configure Vitest; add the `npm test` script
+- [x] `src/types/activity.ts` and `profile.ts` exactly as ARCHITECTURE.md §5
+- [x] `src/lib/config.ts`: reads and validates env vars; `GITHUB_DATA` defaults to `fixtures`
+- [x] `fixtures/activity.json` (relative dates), `activity-empty.json`, `profile.json`, as ARCHITECTURE.md §12
+- [x] `fixtures.ts` resolves relative dates; `GITHUB_FIXTURE_STATE` for empty, rate_limit and token_error
+- [x] `getActivity()` and `getProfile()` in `lib/github/index.ts`, fixtures path only for now
 - **Done when:** a test proves fixture dates resolve relative to `now`, and that fixtures include a 01:00 IST commit, both work repos and all three PR states.
 
 ### 1.3 Metrics library · `feat/metrics`
