@@ -21,10 +21,10 @@ me to do them.
 ## Phase 1 — Foundation and data
 
 ### 1.1 Design tokens and app shell · `feat/shell`
-- [ ] Tokens from DESIGN.md §3 in `globals.css` (light, dark, `data-theme` override) + `@theme inline`
-- [ ] Geist and Geist Mono via `next/font`; tabular numbers utility
-- [ ] `layout.tsx`: `AppHeader` (logo, Dashboard/Profile nav, ThemeToggle, avatar placeholder), no-flash theme script
-- [ ] Favicon from `public/icon.svg`; page titles
+- [x] Tokens from DESIGN.md §3 in `globals.css` (light, dark, `data-theme` override) + `@theme inline`
+- [x] Geist and Geist Mono via `next/font`; tabular numbers utility
+- [x] `layout.tsx`: `AppHeader` (logo, Dashboard/Profile nav, ThemeToggle, avatar placeholder), no-flash theme script
+- [x] Favicon from `public/icon.svg`; page titles
 - **Done when:** empty dashboard and profile routes render the header correctly in both themes at 390 and 1280 px; lint and build pass.
 
 ### 1.2 Types, config and fixtures · `feat/fixtures`
@@ -100,6 +100,7 @@ me to do them.
 - **Done when:** the DESIGN.md §12 checklist passes on every screen.
 
 ### 3.4 Deploy · merge `v2` → `main`
+- [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which turn off Vercel deploys while `main` still holds the old Vite app
 - [ ] **(me)** Vercel env vars: `GITHUB_TOKEN`, `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live`; framework preset Next.js
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
 - [ ] **(me)** Launch checklist (Rebuild Guide step 8): 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
@@ -114,4 +115,4 @@ tools → `/git-track` session logging + database → branch tracking and goals.
 
 Ideas that come up during the build go here instead of into the current task.
 
--
+- [ ] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default)
