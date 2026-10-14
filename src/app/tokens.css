@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --control-border: #8492a6;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent: #15803d;
+  --on-accent: #ffffff;
+  --accent-text: #15803d;
+  --accent-subtle: #dcfce7;
+  --focus-ring: #15803d;
+  --danger: #b91c1c;
+  --danger-subtle: #fef2f2;
+  --warning: #b45309;
+  --warning-subtle: #fffbeb;
+  --heat-0: #eef2f6;
+  --heat-1: #bbf7d0;
+  --heat-2: #4ade80;
+  --heat-3: #16a34a;
+  --heat-4: #166534;
+  --series-personal: #15803d;
+  --series-work: #94a3b8;
+  --pr-open: #2563eb;
+  --pr-merged: #6d28d9;
+  --skeleton: var(--surface-hover);
+  --shadow-popover: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #020617;
+    --surface: #0f172a;
+    --surface-hover: #1e293b;
+    --border: #1e293b;
+    --control-border: #64748b;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent: #22c55e;
+    --on-accent: #052e16;
+    --accent-text: #4ade80;
+    --accent-subtle: #052e16;
+    --focus-ring: #4ade80;
+    --danger: #f87171;
+    --danger-subtle: #450a0a;
+    --warning: #fbbf24;
+    --warning-subtle: #451a03;
+    --heat-0: #1e293b;
+    --heat-1: #14532d;
+    --heat-2: #15803d;
+    --heat-3: #22c55e;
+    --heat-4: #86efac;
+    --series-personal: #22c55e;
+    --series-work: #475569;
+    --pr-open: #60a5fa;
+    --pr-merged: #c4b5fd;
+    --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #020617;
+  --surface: #0f172a;
+  --surface-hover: #1e293b;
+  --border: #1e293b;
+  --control-border: #64748b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent: #22c55e;
+  --on-accent: #052e16;
+  --accent-text: #4ade80;
+  --accent-subtle: #052e16;
+  --focus-ring: #4ade80;
+  --danger: #f87171;
+  --danger-subtle: #450a0a;
+  --warning: #fbbf24;
+  --warning-subtle: #451a03;
+  --heat-0: #1e293b;
+  --heat-1: #14532d;
+  --heat-2: #15803d;
+  --heat-3: #22c55e;
+  --heat-4: #86efac;
+  --series-personal: #22c55e;
+  --series-work: #475569;
+  --pr-open: #60a5fa;
+  --pr-merged: #c4b5fd;
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
