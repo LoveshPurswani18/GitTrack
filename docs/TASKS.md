@@ -100,6 +100,7 @@ me to do them.
 - **Done when:** the DESIGN.md §12 checklist passes on every screen.
 
 ### 3.4 Deploy · merge `v2` → `main`
+- [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which turn off Vercel deploys while `main` still holds the old Vite app
 - [ ] **(me)** Vercel env vars: `GITHUB_TOKEN`, `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live`; framework preset Next.js
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
 - [ ] **(me)** Launch checklist (Rebuild Guide step 8): 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
