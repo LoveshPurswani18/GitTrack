@@ -199,7 +199,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - Today's cell: 1.5px `text-primary` outline, 1px offset.
 - Days are grouped in the selected timezone from UTC timestamps.
 - Footer: left caption "Levels are quartiles of your active days in this range." (desktop only); right legend "Less ▢▢▢▢▢ More" with 10px swatches.
-- Range layouts: 1Y = 53 columns; 6M = 26; 1M = 5; 1W and Today = one week column.
+- Range layouts: ranges are rolling days ending today, so the columns are the weeks the range touches: 1Y = 53–54; 6M = 26–27; 1M = 5–6; 1W = 1–2; Today = 1. Days outside the range are left empty.
 - Tooltip on hover and keyboard focus: "6 commits · Tue, 14 Oct" (`surface`, `border`, `shadow-popover`, z 60).
 
 ### 6.6 PRBadge and the Pull requests card
