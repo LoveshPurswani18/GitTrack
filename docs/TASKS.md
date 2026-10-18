@@ -17,6 +17,7 @@ me to do them.
 
 - [x] Spike script, run against live data, 9/9 checks pass (`spike/RESULTS.md`)
 - [x] PRD updated: IST day grouping, REST commits as the single source of commit counts
+- [x] Switched package manager from npm to pnpm (PR merged into v2, 18 Oct)
 
 ## Phase 1 — Foundation and data
 
@@ -103,6 +104,7 @@ me to do them.
 - [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which turn off Vercel deploys while `main` still holds the old Vite app
 - [ ] **(me)** Vercel env vars: `GITHUB_TOKEN`, `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live`; framework preset Next.js
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
+- [ ] **(me)** Production build log shows pnpm install (pnpm 12.x), Install Command empty, Node 24.x
 - [ ] **(me)** Launch checklist (Rebuild Guide step 8): 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
 - [ ] **(me)** Keep the URL unshared until auth (PRD risk, accepted 12 Oct)
 
@@ -116,3 +118,6 @@ tools → `/git-track` session logging + database → branch tracking and goals.
 Ideas that come up during the build go here instead of into the current task.
 
 - [ ] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default)
+- [ ] Replace vite-tsconfig-paths with resolve.tsconfigPaths: true in vitest.config.mts (removes the plugin and the deprecated tsconfck warning)
+- [ ] Upgrade ESLint 9 → 10 once eslint-config-next supports it
+- [ ] braces advisory GHSA-vfj7-8cjw-p6xm (dev-only, via eslint-config-next): run pnpm audit --fix once a patched version ships
