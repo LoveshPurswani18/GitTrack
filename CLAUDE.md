@@ -59,6 +59,7 @@ data yourself. The global company boundary stands; this project does not relax i
 
 ## Workflow for this project
 - Start every feature in plan mode and wait for my approval of the plan.
+- After writing or revising a plan, post it in chat and wait; don't call ExitPlanMode until I say it's approved.
 - One feature per branch off `v2`: `feat/<name>`. PRs target `v2`, not `main`.
 - Before proposing commits: `pnpm lint`, `pnpm test`, then the build (global rule).
 - Commits: follow the global stopping rule and the `atomic-commit` skill.

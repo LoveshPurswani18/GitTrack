@@ -165,24 +165,37 @@ goes to `error.tsx`. Error messages never include the token.
 
 ## 9. Metrics (`src/lib/metrics/`) — pure, tested, timezone-aware
 
-Every function is pure: data in, data out, with no `Date.now()` inside. `now`
-is passed as an argument so tests are deterministic.
+Every function is pure: data in, data out, with no `Date.now()` inside (ESLint
+enforces this, along with no imports from `lib/github`, React or Next). `now` is
+passed as an argument so tests are deterministic.
+
+A **day** is a `YYYY-MM-DD` string in the selected timezone. `DayBounds` is
+`{ start, end }`, both inclusive. The timezone is assumed to be a valid IANA name,
+validated by the caller; an invalid one throws a `RangeError`.
 
 | File | Exports | Notes |
 | --- | --- | --- |
-| `days.ts` | `toLocalDay(iso, tz)`, `dayRange(start, end)` | `Intl.DateTimeFormat("en-CA", { timeZone })` → `YYYY-MM-DD`. Never parse dates by hand. |
-| `filter.ts` | `filterByScope(activity, "all" \| "personal" \| "work")` | Uses `Repo.isWork` |
-| `range.ts` | `rangeBounds(range, now, tz)` | `today`, `1w`, `1m`, `6m`, `1y`; local-day boundaries |
-| `daily.ts` | `dailyCounts(commits, tz, bounds)` | `Map<day, count>`, zero-filled for the heatmap |
-| `streaks.ts` | `currentStreak`, `longestStreak` | Current streak ends today or yesterday (PRD) |
-| `summary.ts` | `commitsToday`, `thisWeekVsLast`, `totalInRange` | Weeks start Monday (DESIGN.md heatmap) |
-| `projects.ts` | `commitsByRepo` | Sorted by count desc, with `isWork` |
-| `prs.ts` | `prStats`, `recentPrs` | Opened (by createdAt), open now, merged (by mergedAt) in range |
-| `heatmap.ts` | `heatmapGrid(daily, range)`, `level(count, max)` | Week columns, Monday-first rows |
+| `days.ts` | `toLocalDay(iso \| Date, tz)`, `dayRange(start, end)`, `addDays(day, n)`, `weekday(day)`, `startOfWeek(day)` | `Intl.DateTimeFormat` with explicit year/month/day parts, never hand-parsed. `weekday` is Monday = 0. `addDays` is date-only arithmetic. |
+| `filter.ts` | `Scope`, `filterByScope(activity, "all" \| "personal" \| "work")` | Uses `Repo.isWork`. **Commits and PRs whose repo is not in `Activity.repos` are dropped in every scope**, so work data can't leak into Personal. |
+| `range.ts` | `Range`, `DayBounds`, `RANGE_DAYS`, `rangeBounds(range, now, tz)`, `inBounds(day, bounds)` | **Rolling days ending today** in the tz: `today` 1, `1w` 7, `1m` 30, `6m` 182, `1y` 365. |
+| `daily.ts` | `dailyCounts(commits, tz, bounds)`, `activeDays(commits, tz)` | `Map<day, count>`, zero-filled for the heatmap |
+| `streaks.ts` | `currentStreak(commits, tz, now)`, `longestStreak(commits, tz)` | Current streak ends today or yesterday (PRD). Both ignore the selected range and use all commits passed in, so they are capped by the 365-day fetch window. |
+| `summary.ts` | `commitsToday`, `thisWeekVsLast(commits, tz, now)`, `totalInRange` | Weeks start Monday. This week is Monday → today, compared with the **same span** last week (Monday → the same weekday). |
+| `projects.ts` | `commitsByRepo(activity, tz, bounds)` | Sorted by count desc, then name; carries `url` and `isWork`. Skips repos not in `Activity.repos`. |
+| `prs.ts` | `prStats(prs, tz, bounds)`, `recentPrs(prs, tz, bounds, limit = 5)` | Opened (by createdAt), merged (by mergedAt) in range; open now ignores the range. `recentPrs` lists PRs opened in range, newest first. |
+| `heatmap.ts` | `Cell = { day, count, level }`, `Level`, `Thresholds`, `heatmapGrid(daily, bounds)`, `levelThresholds(counts)`, `level(count, thresholds)` | Week columns from the Monday of `bounds.start`, Monday-first rows; days outside the bounds are `null`. |
+
+**Heatmap levels** are quartiles of the active days (count > 0) in the shown range.
+`levelThresholds` sorts those counts and takes the nearest-rank values at 25%, 50%
+and 75% (`t1`, `t2`, `t3`) plus the maximum. `level` returns 0 for no commits,
+always 4 for the busiest day, and otherwise `1 +` the number of `t1`/`t2`/`t3`
+strictly below the count, so duplicate thresholds with few active days still give
+a sensible 1–4.
 
 Required tests include a commit at **01:00 IST**, which lands on the IST day in
 `Asia/Kolkata` and on the previous day in `UTC`, plus empty ranges, a streak
-that ends yesterday, a week boundary on Monday, and a closed-unmerged PR.
+that ends yesterday, a week boundary on Monday (00:30 IST is this week in IST and
+last week in UTC), and a closed-unmerged PR.
 
 ## 10. Page and component flow
 
