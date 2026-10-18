@@ -117,6 +117,7 @@ tools → `/git-track` session logging + database → branch tracking and goals.
 
 Ideas that come up during the build go here instead of into the current task.
 
+- [ ] **(me)** Add the walkthrough rule to `~/.claude/CLAUDE.md` too, so it applies in every project: "After any code edit, finish with a short walkthrough: per feature or fix, what changed, which files, and why it matters for the project. Don't paste code." (Added to this project's CLAUDE.md on 18 Oct; Claude shouldn't edit the global file.)
 - [ ] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default)
 - [ ] Replace vite-tsconfig-paths with resolve.tsconfigPaths: true in vitest.config.mts (removes the plugin and the deprecated tsconfck warning)
 - [ ] Upgrade ESLint 9 → 10 once eslint-config-next supports it
