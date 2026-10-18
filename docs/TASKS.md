@@ -38,8 +38,8 @@ me to do them.
 - **Done when:** a test proves fixture dates resolve relative to `now`, and that fixtures include a 01:00 IST commit, both work repos and all three PR states.
 
 ### 1.3 Metrics library · `feat/metrics`
-- [ ] `days`, `filter`, `range`, `daily`, `streaks`, `summary`, `projects`, `prs`, `heatmap` (ARCHITECTURE.md §9)
-- [ ] Unit tests for each; the required cases: 01:00 IST commit (IST vs UTC day), empty range, streak ending yesterday, streak broken today, Monday week boundary, closed-unmerged PR, scope filter
+- [x] `days`, `filter`, `range`, `daily`, `streaks`, `summary`, `projects`, `prs`, `heatmap` (ARCHITECTURE.md §9)
+- [x] Unit tests for each; the required cases: 01:00 IST commit (IST vs UTC day), empty range, streak ending yesterday, streak broken today, Monday week boundary, closed-unmerged PR, scope filter
 - **Done when:** `pnpm test` passes, metrics have no imports from `lib/github` or React, and no `Date.now()` is used inside them.
 
 ### 1.4 Live GitHub data layer · `feat/github-live`
