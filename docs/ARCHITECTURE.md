@@ -53,7 +53,7 @@ Claude Code never sets `live` (see CLAUDE.md, "Work data and the company
 boundary").
 
 `.env.local` stays on `fixtures` permanently. To see live data, I run
-`GITHUB_DATA=live npm run dev` in my own terminal. A variable set in the shell
+`GITHUB_DATA=live pnpm dev` in my own terminal. A variable set in the shell
 wins over `.env.local`, so nothing in the file changes and nothing needs
 switching back.
 
@@ -277,8 +277,8 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 
 ## 13. Testing and verification
 
-- `npm test` runs Vitest on `lib/metrics` and `lib/github/normalize`.
-- `npm run lint` and `npm run build` must pass before any commit proposal.
+- `pnpm test` runs Vitest on `lib/metrics` and `lib/github/normalize`.
+- `pnpm lint` and `pnpm build` must pass before any commit proposal.
 - UI: Playwright MCP screenshots at 1280×800 and 390×844, light and dark,
   compared against `docs/design/screens/` (DESIGN.md §12). Always use fixtures.
 - Live accuracy, which I run myself: in `Asia/Kolkata`, compare 30 random days and

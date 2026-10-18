@@ -28,7 +28,7 @@ me to do them.
 - **Done when:** empty dashboard and profile routes render the header correctly in both themes at 390 and 1280 px; lint and build pass.
 
 ### 1.2 Types, config and fixtures · `feat/fixtures`
-- [x] Install and configure Vitest; add the `npm test` script
+- [x] Install and configure Vitest; add the `pnpm test` script
 - [x] `src/types/activity.ts` and `profile.ts` exactly as ARCHITECTURE.md §5
 - [x] `src/lib/config.ts`: reads and validates env vars; `GITHUB_DATA` defaults to `fixtures`
 - [x] `fixtures/activity.json` (relative dates), `activity-empty.json`, `profile.json`, as ARCHITECTURE.md §12
@@ -39,7 +39,7 @@ me to do them.
 ### 1.3 Metrics library · `feat/metrics`
 - [ ] `days`, `filter`, `range`, `daily`, `streaks`, `summary`, `projects`, `prs`, `heatmap` (ARCHITECTURE.md §9)
 - [ ] Unit tests for each; the required cases: 01:00 IST commit (IST vs UTC day), empty range, streak ending yesterday, streak broken today, Monday week boundary, closed-unmerged PR, scope filter
-- **Done when:** `npm test` passes, metrics have no imports from `lib/github` or React, and no `Date.now()` is used inside them.
+- **Done when:** `pnpm test` passes, metrics have no imports from `lib/github` or React, and no `Date.now()` is used inside them.
 
 ### 1.4 Live GitHub data layer · `feat/github-live`
 - [ ] `client.ts`: auth header, GraphQL + REST helpers, `Link` pagination, up to 6 parallel requests
@@ -49,7 +49,7 @@ me to do them.
 - [ ] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
 - [ ] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
-- [ ] **(me)** Run `GITHUB_DATA=live npm run dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match.
+- [ ] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match.
 
 ## Phase 2 — Dashboard
 
