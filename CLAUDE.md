@@ -19,8 +19,8 @@ to this project.
 - Tests: Vitest for all metric logic.
 
 ## Commands
-- `npm run dev` — dev server on http://localhost:3000 (fixture data by default)
-- `npm run build` · `npm run lint` · `npm test`
+- `pnpm dev` — dev server on http://localhost:3000 (fixture data by default)
+- `pnpm build` · `pnpm lint` · `pnpm test`
 
 ## Work data and the company boundary (CRITICAL)
 The app shows my WhatBuilds activity at runtime, but you never touch WhatBuilds
@@ -45,6 +45,7 @@ data yourself. The global company boundary stands; this project does not relax i
 - An active day has at least one commit. PRs alone don't count.
 - Metric functions in src/lib/metrics are pure and unit-tested, including a
   late-night IST commit that falls on different days in UTC and Asia/Kolkata.
+- Package manager is pnpm. Never run npm install or create a package-lock.json.
 
 ## UI rules
 - Use only the design tokens (Tailwind classes generated from DESIGN.md section 3).
@@ -59,7 +60,7 @@ data yourself. The global company boundary stands; this project does not relax i
 ## Workflow for this project
 - Start every feature in plan mode and wait for my approval of the plan.
 - One feature per branch off `v2`: `feat/<name>`. PRs target `v2`, not `main`.
-- Before proposing commits: `npm run lint`, `npm test`, then the build (global rule).
+- Before proposing commits: `pnpm lint`, `pnpm test`, then the build (global rule).
 - Commits: follow the global stopping rule and the `atomic-commit` skill.
 - Reviews: `coderabbit-review` skill before I open a PR; `pr-draft` for the PR text.
 - If the PRD or DESIGN.md seems unclear or wrong, ask; don't guess.
