@@ -2,7 +2,8 @@
   "git": {
     "deploymentEnabled": {
       "v2": false,
-      "feat/*": false
+      "feat/*": false,
+      "chore/*": false
     }
   }
 }
