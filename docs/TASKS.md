@@ -50,7 +50,7 @@ me to do them.
 - [x] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
 - [x] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
-- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page is deleted before the PR.)
+- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.4 and returns 404 in production.)
 
 ## Phase 2 — Dashboard
 
