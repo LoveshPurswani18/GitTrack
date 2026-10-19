@@ -43,14 +43,14 @@ me to do them.
 - **Done when:** `pnpm test` passes, metrics have no imports from `lib/github` or React, and no `Date.now()` is used inside them.
 
 ### 1.4 Live GitHub data layer · `feat/github-live`
-- [ ] `client.ts`: auth header, GraphQL + REST helpers, `Link` pagination, up to 6 parallel requests
-- [ ] `live.ts`: GraphQL contributions → repos, PRs, crossCheck, restrictedCount; REST commits per repo, filtered by `author.date` (ARCHITECTURE.md §6)
-- [ ] `normalize.ts` + tests against made-up raw responses in `fixtures/raw/`
-- [ ] `errors.ts`: `token`, `rate_limit`, `network` kinds, plus tests
-- [ ] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
-- [ ] `import "server-only"` in every file in `lib/github`
+- [x] `client.ts`: auth header, GraphQL + REST helpers, `Link` pagination, up to 6 parallel requests
+- [x] `live.ts`: GraphQL contributions → repos, PRs, crossCheck, restrictedCount; REST commits per repo, filtered by `author.date` (ARCHITECTURE.md §6)
+- [x] `normalize.ts` + tests against made-up raw responses in `fixtures/raw/`
+- [x] `errors.ts`: `token`, `rate_limit`, `network` kinds, plus tests
+- [x] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
+- [x] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
-- [ ] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match.
+- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page is deleted before the PR.)
 
 ## Phase 2 — Dashboard
 
@@ -107,6 +107,7 @@ me to do them.
 - [ ] **(me)** Production build log shows pnpm install (pnpm 12.x), Install Command empty, Node 24.x
 - [ ] **(me)** Launch checklist (Rebuild Guide step 8): 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
 - [ ] **(me)** Keep the URL unshared until auth (PRD risk, accepted 12 Oct)
+- [ ] Remove `src/app/dev/live-check` (temporary live-data cross-check page; it returns 404 in production, so it can stay while the core features are built)
 
 ## After the MVP
 
