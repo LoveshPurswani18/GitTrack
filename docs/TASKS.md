@@ -16,7 +16,7 @@ me to do them.
 ## Phase 0 — Validation spike ✅ (13 Oct)
 
 - [x] Spike script, run against live data, 9/9 checks pass (`spike/RESULTS.md`)
-- [x] PRD updated: IST day grouping, REST commits as the single source of commit counts
+- [x] PRD updated: IST day grouping, REST commits as the single source of commit counts (default branch only; extended to all branches in 1.5)
 - [x] Switched package manager from npm to pnpm (PR merged into v2, 18 Oct)
 
 ## Phase 1 — Foundation and data
@@ -44,13 +44,25 @@ me to do them.
 
 ### 1.4 Live GitHub data layer · `feat/github-live`
 - [x] `client.ts`: auth header, GraphQL + REST helpers, `Link` pagination, up to 6 parallel requests
-- [x] `live.ts`: GraphQL contributions → repos, PRs, crossCheck, restrictedCount; REST commits per repo, filtered by `author.date` (ARCHITECTURE.md §6)
+- [x] `live.ts`: GraphQL contributions → repos, PRs, crossCheck, restrictedCount; REST commits per repo, filtered by `author.date` (ARCHITECTURE.md §6; default branch only, replaced by the all-branch fetch in 1.5)
 - [x] `normalize.ts` + tests against made-up raw responses in `fixtures/raw/`
 - [x] `errors.ts`: `token`, `rate_limit`, `network` kinds, plus tests
 - [x] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
 - [x] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
 - [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.4 and returns 404 in production.)
+
+### 1.5 All-branch commits · `feat/all-branches`
+Added 19 Oct: most work lives on feature branches, so counting the default branch only
+hid it (PRD amendment, CLAUDE.md hard rule). Only the data layer changes; metrics and UI
+are untouched.
+- [x] Docs first: CLAUDE.md hard rule, PRD (commit definition, accuracy, risks), ARCHITECTURE §2, §5, §6, §12, §13
+- [x] `Commit.onDefault` and `Activity.supersededCommits`; fixtures with feature-branch commits (some today)
+- [x] `normalize.ts`: branch histories, PR commits, merge and de-duplicate (squash, rebase, true merge, co-authors) with tests
+- [x] `live.ts`: user id, repo discovery, batched all-branch histories, REST follow-up for busy branches, PR commits; tests with fake fetch
+- [x] `/dev/live-check`: per day, all branches vs default-branch-only vs GitHub; per repo counts; PRs opened today
+- **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
+- [x] **(me)** Live checks (19 Oct: GitTrack's all-branch count matched `git log --all` exactly, 21 for the UTC day; work counts looked right; judged good for now), in your own terminal with `GITHUB_DATA=live pnpm dev` on `/dev/live-check`: (1) the default-branch-only column equals GitHub's own count on the days shown; (2) recent `v2` and `feat/*` commits appear on their days; (3) for 2 or 3 cloned repos, `git log --all --author=<me>` per day matches the all-branch column; (4) a squash-merged PR with a deleted branch shows its original days; (5) uncached load time is acceptable
 
 ## Phase 2 — Dashboard
 

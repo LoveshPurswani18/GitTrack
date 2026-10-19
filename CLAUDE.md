@@ -31,7 +31,8 @@ data yourself. The global company boundary stands; this project does not relax i
   run git or gh commands against any WhatBuilds repo.
 - Fixtures live in `src/lib/github/fixtures/`, use made-up repo names
   (`work-repo-a`, `work-repo-b`) with `isWork: true`, and cover late-night IST
-  commits, empty ranges, rate-limit and token errors.
+  commits, feature-branch-only commits (`onDefault: false`), empty ranges,
+  rate-limit and token errors.
 - Never write a real WhatBuilds repo name, PR title or commit message into code,
   tests, fixtures, docs or commit messages. Treat WORK_ORG as an env value only.
 - When a step needs real data (the spike, accuracy checks), write the script or
@@ -41,7 +42,10 @@ data yourself. The global company boundary stands; this project does not relax i
 - GITHUB_TOKEN is server-only. Never prefix a secret with NEXT_PUBLIC_.
 - Never call GitHub from a client component; only from server code in src/lib/github.
 - Timestamps stay in UTC; group into days only in the selected timezone.
-- A commit counts only if it is on the repo's default branch and authored by me.
+- A commit counts if I authored it on any branch of a non-fork repo I can see, once per
+  sha (changed 19 Oct: most of my work is on feature branches). Each commit carries
+  `onDefault` (it is on the repo's default branch) so GitHub's own default-branch counts
+  stay usable as a cross-check; the metrics ignore it.
 - An active day has at least one commit. PRs alone don't count.
 - Metric functions in src/lib/metrics are pure and unit-tested, including a
   late-night IST commit that falls on different days in UTC and Asia/Kolkata.

@@ -4,6 +4,12 @@ Run of `spike/spike.mjs` against live data, 13 Oct 2026. Work repo names are
 replaced with `work-repo-a` … `work-repo-f`; work commit hashes and times are
 left out.
 
+> **Update, 19 Oct:** this spike counted commits on each repo's **default branch
+> only**. The app now counts commits from every branch (PRD amendment, ARCHITECTURE
+> §6). These results are kept as history: they still describe the default-branch
+> subset, which is what GitHub's own profile counts and what the live-check page
+> uses as the cross-check.
+
 ## Run
 
 | Item | Value |
