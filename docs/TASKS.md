@@ -55,9 +55,9 @@ me to do them.
 ## Phase 2 — Dashboard
 
 ### 2.1 UI primitives · `feat/ui-primitives`
-- [ ] `components/ui`: Button, SegmentedControl, TimezoneSelect, StatCard, Heatmap, ProjectList, PRBadge, WorkTag, Banner, Skeleton, ProfileCard (DESIGN.md §6), all props-driven, no data fetching
-- [ ] Selected segment changes colour only; focus rings; aria labels on icon buttons
-- **Done when:** a temporary `/dev/ui` page (deleted before merge, or excluded from production) shows every primitive in both themes, and it matches the design system.
+- [x] `components/ui`: Button, SegmentedControl, TimezoneSelect, StatCard, Heatmap, ProjectList, PRBadge, WorkTag, Banner, Skeleton, ProfileCard (DESIGN.md §6), all props-driven, no data fetching
+- [x] Selected segment changes colour only; focus rings; aria labels on icon buttons
+- **Done when:** a `/dev/components` page (404 in production, kept through the build as a reference) shows every primitive in both themes, and it matches the design system.
 
 ### 2.2 Dashboard with controls and stats · `feat/dashboard`
 - [ ] `page.tsx` → `Dashboard` client component; skeleton until mounted (tz is browser-only)
@@ -69,6 +69,7 @@ me to do them.
 ### 2.3 Activity heatmap · `feat/heatmap`
 - [ ] `ActivityCard` with `Heatmap`: weeks as columns, Monday first, 5 levels, layouts per range (DESIGN.md §6.5)
 - [ ] Tooltip/label per cell: "N commits on <date>"; horizontal scroll on mobile
+- [ ] Make the per-cell labels reachable: the 2.1 `Heatmap` wrapper has `role="img"`, which hides the cells' `aria-label`s from screen readers. Change the wrapper role (for example `grid`) and make cells focusable with arrow-key movement (DESIGN.md §10)
 - **Done when:** the 1Y view matches the design PNG, and the 01:00 IST fixture commit moves between days when the tz changes.
 
 ### 2.4 Commits by project · `feat/projects`
@@ -77,7 +78,7 @@ me to do them.
 
 ### 2.5 Pull requests · `feat/pull-requests`
 - [ ] `PullRequestsCard`: opened / open now / merged for the range; recent PR list with title, repo, PRBadge (open, merged, closed), Work tag, link out
-- **Done when:** matches the design PNG; the closed-unmerged fixture PR shows the closed badge.
+- **Done when:** matches the design PNG, except the PR dot colours (open is GitHub green and merged is a different purple than in the PNG, by choice; see DESIGN.md §13 "Known differences"); the closed-unmerged fixture PR shows the closed badge.
 
 ## Phase 3 — Profile, states and launch
 
