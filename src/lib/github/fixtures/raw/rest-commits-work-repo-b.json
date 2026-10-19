@@ -1,0 +1,10 @@
+[
+  {
+    "sha": "c100000000000000000000000000000000000001",
+    "commit": {
+      "author": { "date": "2026-10-11T04:00:00Z" },
+      "committer": { "date": "2026-10-11T04:00:00Z" },
+      "message": "Tidy the queue worker"
+    }
+  }
+]

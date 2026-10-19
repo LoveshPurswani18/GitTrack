@@ -1,0 +1,126 @@
+{
+  "data": {
+    "user": {
+      "contributionsCollection": {
+        "restrictedContributionsCount": 2,
+        "commitContributionsByRepository": [
+          {
+            "repository": {
+              "nameWithOwner": "demo-user/gittrack",
+              "url": "https://github.com/demo-user/gittrack",
+              "isFork": false,
+              "isPrivate": false,
+              "owner": { "login": "demo-user" },
+              "defaultBranchRef": { "name": "main" }
+            },
+            "contributions": {
+              "nodes": [
+                { "occurredAt": "2026-10-13T07:00:00Z", "commitCount": 1 },
+                { "occurredAt": "2026-10-12T07:00:00Z", "commitCount": 1 },
+                { "occurredAt": "2026-10-11T07:00:00Z", "commitCount": 1 }
+              ]
+            }
+          },
+          {
+            "repository": {
+              "nameWithOwner": "Work-Org/work-repo-a",
+              "url": "https://github.com/Work-Org/work-repo-a",
+              "isFork": false,
+              "isPrivate": true,
+              "owner": { "login": "Work-Org" },
+              "defaultBranchRef": { "name": "main" }
+            },
+            "contributions": { "nodes": [{ "occurredAt": "2026-10-13T07:00:00Z", "commitCount": 1 }] }
+          },
+          {
+            "repository": {
+              "nameWithOwner": "Work-Org/work-repo-b",
+              "url": "https://github.com/Work-Org/work-repo-b",
+              "isFork": false,
+              "isPrivate": true,
+              "owner": { "login": "Work-Org" },
+              "defaultBranchRef": { "name": "develop" }
+            },
+            "contributions": { "nodes": [{ "occurredAt": "2026-10-11T07:00:00Z", "commitCount": 1 }] }
+          },
+          {
+            "repository": {
+              "nameWithOwner": "demo-user/forked-lib",
+              "url": "https://github.com/demo-user/forked-lib",
+              "isFork": true,
+              "isPrivate": false,
+              "owner": { "login": "demo-user" },
+              "defaultBranchRef": { "name": "main" }
+            },
+            "contributions": { "nodes": [{ "occurredAt": "2026-10-09T07:00:00Z", "commitCount": 4 }] }
+          },
+          {
+            "repository": {
+              "nameWithOwner": "demo-user/empty-repo",
+              "url": "https://github.com/demo-user/empty-repo",
+              "isFork": false,
+              "isPrivate": false,
+              "owner": { "login": "demo-user" },
+              "defaultBranchRef": { "name": "main" }
+            },
+            "contributions": { "nodes": [{ "occurredAt": "2026-10-08T07:00:00Z", "commitCount": 1 }] }
+          },
+          {
+            "repository": {
+              "nameWithOwner": "demo-user/no-branch",
+              "url": "https://github.com/demo-user/no-branch",
+              "isFork": false,
+              "isPrivate": false,
+              "owner": { "login": "demo-user" },
+              "defaultBranchRef": null
+            },
+            "contributions": { "nodes": [{ "occurredAt": "2026-10-07T07:00:00Z", "commitCount": 1 }] }
+          }
+        ],
+        "pullRequestContributions": {
+          "pageInfo": { "hasNextPage": true, "endCursor": "cursor-1" },
+          "nodes": [
+            {
+              "pullRequest": {
+                "number": 7,
+                "title": "Add the metrics library",
+                "url": "https://github.com/demo-user/gittrack/pull/7",
+                "state": "OPEN",
+                "createdAt": "2026-10-13T08:00:00Z",
+                "mergedAt": null,
+                "closedAt": null,
+                "repository": {
+                  "nameWithOwner": "demo-user/gittrack",
+                  "url": "https://github.com/demo-user/gittrack",
+                  "isFork": false,
+                  "isPrivate": false,
+                  "owner": { "login": "demo-user" },
+                  "defaultBranchRef": { "name": "main" }
+                }
+              }
+            },
+            {
+              "pullRequest": {
+                "number": 3,
+                "title": "Fix a typo in the docs",
+                "url": "https://github.com/other-org/oss-project/pull/3",
+                "state": "OPEN",
+                "createdAt": "2026-10-05T08:00:00Z",
+                "mergedAt": null,
+                "closedAt": null,
+                "repository": {
+                  "nameWithOwner": "other-org/oss-project",
+                  "url": "https://github.com/other-org/oss-project",
+                  "isFork": false,
+                  "isPrivate": false,
+                  "owner": { "login": "other-org" },
+                  "defaultBranchRef": { "name": "main" }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
