@@ -13,7 +13,7 @@ The single source of truth for how GitTrack looks and behaves. Read this before 
 GitTrack is a minimal developer tool: flat neutral surfaces, one green accent, numbers set in mono. Data is the hero; chrome stays quiet.
 
 1. **Numbers first.** Every screen leads with a number in `metric-xl` or `metric`, with its label above it in `label` / `text-muted`.
-2. **One accent.** Green (`accent`) means activity or the current selection. Nothing else is green; nothing decorative uses colour.
+2. **One accent.** Green (`accent`) means activity or the current selection. Nothing decorative uses colour. The one exception is PR status dots, which use GitHub's own open green and merged purple so they read the same as on github.com.
 3. **Flat.** Solid `surface` with a 1px `border`. No card shadows, no blur, no gradients, no glass. `shadow-popover` is the only shadow.
 4. **Honest data.** Never hide a zero, never animate a number into place, and always show the range and timezone near a value.
 5. **Work is labelled, not hidden.** WhatBuilds repos and PRs show their real names and titles, followed by a "Work" tag.
@@ -60,8 +60,8 @@ All colours have a light and a dark value. The light theme is the default; dark 
 | `heat-4` | `#166534` | `#86efac` | Heatmap: top quartile |
 | `series-personal` | `#15803d` | `#22c55e` | Personal repos in bars and legends |
 | `series-work` | `#94a3b8` | `#475569` | Work repos in bars and legends |
-| `pr-open` | `#2563eb` | `#60a5fa` | Open PR dot (always with the word "open") |
-| `pr-merged` | `#6d28d9` | `#c4b5fd` | Merged PR dot (always with the word "merged") |
+| `pr-open` | `#1a7f37` | `#3fb950` | Open PR dot (always with the word "open"). GitHub's open green (Primer `fgColor-open`) |
+| `pr-merged` | `#8250df` | `#ab7df8` | Merged PR dot (always with the word "merged"). GitHub's merged purple (Primer `fgColor-done`) |
 | `skeleton` | = `surface-hover` | = `surface-hover` | Loading placeholder blocks |
 
 Heatmap levels step in lightness (light → dark in the light theme, dark → light in the dark theme), so they read without relying on hue.
@@ -311,7 +311,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 
 ## 12. Verifying a UI change
 
-1. Compare the page against its PNG in `docs/design/screens/` at the same width (1280 or 390), in light and dark.
+1. Compare the page against its PNG in `docs/design/screens/` at the same width (1280 or 390), in light and dark. Ignore the differences listed under "Known differences" in section 13.
 2. Check every state the component can be in (`/dev/components`).
 3. Tab through the page: every control is reachable and shows the focus ring.
 4. Search the diff for hex colours, `shadow`, `blur` and off-scale spacing; there should be none outside `tokens.css`.
@@ -333,5 +333,8 @@ The screens use sample data. Text in square brackets is a placeholder (work repo
 | `state-token-error-light.png` / `-dark.png` | Token rejected, no cache |
 
 The state screens show the content area only; the header and controls are the same as on the dashboard.
+
+**Known differences (the PNGs are not re-exported; the tokens in section 3 win):**
+- PR status dots: the PNGs show blue (open) and purple (merged) from the first design. The app uses GitHub's own colours: green `pr-open` and purple `pr-merged` (section 3.1). When comparing a screenshot with `dashboard-*` or `state-*`, a green open dot and a slightly different purple merged dot are expected, not a mismatch.
 
 The live, clickable mockups and the design system are in Claude Design (GitTrack v2 Screens, GitTrack design system). Update those first when the design changes, then re-export the PNGs and this file.
