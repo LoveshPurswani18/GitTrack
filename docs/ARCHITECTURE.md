@@ -100,7 +100,7 @@ export type PullRequest = {
 export type Activity = {
   username: string;
   fetchedAt: string;          // ISO UTC, shown as "Updated 3 min ago"
-  windowStart: string;        // now − 365 days
+  windowStart: string;        // now − 364 days (GitHub caps the range at a year)
   windowEnd: string;          // now
   repos: Repo[];
   commits: Commit[];
@@ -117,33 +117,50 @@ Commit messages are never fetched or stored, because the app doesn't need them.
 
 ## 6. Fetching (live mode)
 
-`getActivity()` in `src/lib/github/live.ts`:
+`getActivity()` in `src/lib/github/live.ts` (`fetchLiveActivity`):
 
-1. **GraphQL, one call** (`contributionsCollection(from, to)` for the last
-   365 days): `commitContributionsByRepository` gives the repos with my commits
-   (name, owner, url, private, default branch) plus per-day counts for
-   `crossCheck`. `pullRequestContributions` gives my PRs with title, number,
-   url, state, createdAt, mergedAt and closedAt, paginated.
-   `restrictedContributionsCount` is also read.
-2. **REST, per repo, in parallel with up to 6 at once**:
+1. **GraphQL, one call plus PR pages** (`contributionsCollection(from, to)` for the
+   last 364 days): `commitContributionsByRepository` gives the repos with my commits
+   (name, owner, url, private, fork, default branch) plus per-day counts for
+   `crossCheck` (first 100 days per repo; debug only). `pullRequestContributions`
+   gives my PRs with title, number, url, state, createdAt, mergedAt and closedAt,
+   paginated 100 at a time. `restrictedContributionsCount` is also read.
+   **`Activity.repos` is the union of the commit repos and the repos of my PRs**,
+   because metrics drop any record whose repo is not listed. Repos that only
+   appear through a PR get no commit fetch.
+2. **REST, per repo, up to 6 at once** (`client.pool`):
    `GET /repos/{owner}/{repo}/commits?author={username}&sha={defaultBranch}&since=&until=&per_page=100`,
    following `Link` pagination. Widen `since`/`until` by 3 days, because these
    filter on committer date, then keep only commits whose `author.date` falls in
-   the window. De-duplicate by `sha`.
+   the window. De-duplicate by `sha`. Forks, repos without a default branch and
+   PR-only repos are skipped; a 409 (empty repo) means no commits. Any other
+   failure throws, so commits are never silently undercounted.
 3. Map the raw responses with the pure functions in `normalize.ts`. These are
-   unit-tested against fixture-shaped raw JSON.
+   unit-tested against made-up raw JSON in `fixtures/raw/`.
 
-`getProfile()` makes one call to `GET /users/{username}`.
+`client.ts` is the only file that talks to the network. It takes the token as an
+argument (`config.ts` is the only place that reads `process.env`) and an injectable
+`fetch`, so tests run without a network.
+
+`getProfile()` makes one call to `GET /users/{username}` (`fetchLiveProfile`).
 
 All GitHub code lives in `src/lib/github/`, and each file starts with
 `import "server-only"`. No client component imports from it.
 
 ## 7. Caching and refresh
 
-- Wrap `getActivity()` and `getProfile()` in the installed Next.js version's
-  data cache, with a 15-minute lifetime and the tag `github`. Check the Next.js
-  docs for the current API (for example `unstable_cache` or `"use cache"` with
-  `cacheLife`/`cacheTag`) rather than guessing.
+- The live path of `getActivity()` and `getProfile()` is wrapped in `"use cache"`
+  (in-memory handler) with `cacheTag("github")` and
+  `cacheLife({ stale: 300, revalidate: 900, expire: 3600 })`: fresh for 15 minutes,
+  then served stale while it refreshes. The fixtures path is **not** cached, because
+  the fixture state comes from an env var and its dates are relative to now.
+- **Failures are not cached for 15 minutes.** The cached function returns
+  `{ ok: true, data }` or `{ ok: false, error }` as plain data and calls
+  `cacheLife("seconds")` on failure, so a fixed token or a passed rate limit
+  recovers on the next request. The outer function rethrows a real `GitHubError`.
+- The in-memory handler may not persist between requests on serverless hosting
+  (Vercel). If the launch check (cached load under 2 s) fails there, switch the
+  directive to `"use cache: remote"`.
 - **Refresh** is a server action in `src/app/actions.ts` that revalidates the
   `github` tag, then calls `router.refresh()` on the client. While it runs, the
   current data stays on screen and the button shows "Refreshing…" (DESIGN.md §8).
@@ -259,11 +276,11 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   ├── config.ts          # env parsing, server only
     │   ├── github/            # server only
     │   │   ├── index.ts       # getActivity / getProfile, picks fixtures or live, caching
-    │   │   ├── live.ts
+    │   │   ├── live.ts        # fetchLiveActivity / fetchLiveProfile, GraphQL queries
     │   │   ├── fixtures.ts
     │   │   ├── client.ts      # fetch wrapper: auth header, GraphQL + REST, pagination
     │   │   ├── normalize.ts   # raw API JSON → types (pure, tested)
-    │   │   ├── errors.ts
+    │   │   ├── errors.ts      # GitHubError, HTTP/GraphQL error classification
     │   │   ├── *.test.ts
     │   │   └── fixtures/
     │   │       ├── activity.json      # made-up: personal repos + work-repo-a, work-repo-b
@@ -271,6 +288,7 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   │       ├── profile.json
     │   │       └── raw/               # made-up raw API responses for normalize tests
     │   └── metrics/           # pure functions + *.test.ts (section 9)
+    ├── test/                  # test-only helpers: factories.ts, fakeFetch.ts
     └── types/
         ├── activity.ts
         └── profile.ts
