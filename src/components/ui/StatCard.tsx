@@ -22,7 +22,7 @@ export function StatCard({
   unit?: string;
   /** Signed change; positive reads green, negative stays muted. Rendered before `deltaLabel`. */
   delta?: number;
-  deltaLabel?: string;
+  deltaLabel?: ReactNode;
   context?: ReactNode;
 }) {
   return (
