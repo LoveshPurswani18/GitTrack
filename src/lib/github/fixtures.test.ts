@@ -96,11 +96,27 @@ describe("loadFixtureActivity", () => {
     expect(shas.size).toBe(activity.commits.length);
   });
 
-  it("has a streak ending yesterday and none today", () => {
-    const days = new Set(activity.commits.map((c) => istDay(c.authoredAt)));
-    expect(days.has("2026-10-14")).toBe(false);
-    expect(days.has("2026-10-13")).toBe(true);
-    expect(days.has("2026-10-12")).toBe(true);
+  it("has a default-branch streak ending yesterday, with today's commits only on feature branches", () => {
+    const defaultDays = new Set(activity.commits.filter((c) => c.onDefault).map((c) => istDay(c.authoredAt)));
+    expect(defaultDays.has("2026-10-14")).toBe(false);
+    expect(defaultDays.has("2026-10-13")).toBe(true);
+    expect(defaultDays.has("2026-10-12")).toBe(true);
+
+    const today = activity.commits.filter((c) => istDay(c.authoredAt) === "2026-10-14");
+    expect(today.length).toBeGreaterThan(0);
+    expect(today.every((c) => !c.onDefault)).toBe(true);
+  });
+
+  it("includes feature-branch commits in personal and work repos", () => {
+    const branchOnly = activity.commits.filter((c) => !c.onDefault);
+    const isWork = new Map(activity.repos.map((r) => [r.nameWithOwner, r.isWork]));
+    expect(branchOnly.some((c) => isWork.get(c.repo) === false)).toBe(true);
+    expect(branchOnly.some((c) => isWork.get(c.repo) === true)).toBe(true);
+    expect(activity.commits.some((c) => c.onDefault)).toBe(true);
+  });
+
+  it("has no superseded commits", () => {
+    expect(activity.supersededCommits).toEqual([]);
   });
 
   it("has enough history for the 1Y heatmap", () => {

@@ -10,6 +10,7 @@ export type Commit = {
   sha: string;
   repo: string; // Repo.nameWithOwner
   authoredAt: string; // ISO 8601, UTC — commit.author.date
+  onDefault: boolean; // found on the repo's default branch; metrics ignore it
 };
 
 export type PullRequest = {
@@ -33,4 +34,7 @@ export type Activity = {
   pullRequests: PullRequest[];
   restrictedCount: number; // from GraphQL; 0 means the token sees everything
   crossCheck: { date: string; count: number }[]; // GitHub's per-day counts, debug only
+  // Default-branch commits dropped because my PR's own commits replace them (squash and rebase
+  // merges). Debug only: the `onDefault` commits plus these equal what GitHub counts.
+  supersededCommits: Commit[];
 };

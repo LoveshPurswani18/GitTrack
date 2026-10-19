@@ -8,6 +8,9 @@
     {"nameWithOwner": "work-org/work-repo-b", "url": "https://github.com/work-org/work-repo-b", "isPrivate": true, "isWork": true, "defaultBranch": "develop"}
   ],
   "commits": [
+    {"repo": "demo-user/gittrack", "daysAgo": 0, "time": "09:20+05:30", "count": 3, "onDefault": false},
+    {"repo": "work-org/work-repo-a", "daysAgo": 0, "time": "09:45+05:30", "count": 2, "onDefault": false},
+    {"repo": "demo-user/notes-app", "daysAgo": 1, "time": "18:10+05:30", "onDefault": false},
     {"repo": "demo-user/gittrack", "daysAgo": 1, "time": "21:40+05:30", "count": 3},
     {"repo": "work-org/work-repo-a", "daysAgo": 1, "time": "11:15+05:30", "count": 2},
     {"repo": "demo-user/gittrack", "daysAgo": 2, "time": "22:05+05:30", "count": 2},

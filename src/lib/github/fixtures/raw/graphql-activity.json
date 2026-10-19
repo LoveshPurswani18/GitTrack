@@ -1,6 +1,7 @@
 {
   "data": {
     "user": {
+      "id": "U_demo",
       "contributionsCollection": {
         "restrictedContributionsCount": 2,
         "commitContributionsByRepository": [
@@ -10,14 +11,27 @@
               "url": "https://github.com/demo-user/gittrack",
               "isFork": false,
               "isPrivate": false,
-              "owner": { "login": "demo-user" },
-              "defaultBranchRef": { "name": "main" }
+              "owner": {
+                "login": "demo-user"
+              },
+              "defaultBranchRef": {
+                "name": "main"
+              }
             },
             "contributions": {
               "nodes": [
-                { "occurredAt": "2026-10-13T07:00:00Z", "commitCount": 1 },
-                { "occurredAt": "2026-10-12T07:00:00Z", "commitCount": 1 },
-                { "occurredAt": "2026-10-11T07:00:00Z", "commitCount": 1 }
+                {
+                  "occurredAt": "2026-10-13T07:00:00Z",
+                  "commitCount": 1
+                },
+                {
+                  "occurredAt": "2026-10-12T07:00:00Z",
+                  "commitCount": 1
+                },
+                {
+                  "occurredAt": "2026-10-11T07:00:00Z",
+                  "commitCount": 1
+                }
               ]
             }
           },
@@ -27,10 +41,21 @@
               "url": "https://github.com/Work-Org/work-repo-a",
               "isFork": false,
               "isPrivate": true,
-              "owner": { "login": "Work-Org" },
-              "defaultBranchRef": { "name": "main" }
+              "owner": {
+                "login": "Work-Org"
+              },
+              "defaultBranchRef": {
+                "name": "main"
+              }
             },
-            "contributions": { "nodes": [{ "occurredAt": "2026-10-13T07:00:00Z", "commitCount": 1 }] }
+            "contributions": {
+              "nodes": [
+                {
+                  "occurredAt": "2026-10-13T07:00:00Z",
+                  "commitCount": 1
+                }
+              ]
+            }
           },
           {
             "repository": {
@@ -38,10 +63,21 @@
               "url": "https://github.com/Work-Org/work-repo-b",
               "isFork": false,
               "isPrivate": true,
-              "owner": { "login": "Work-Org" },
-              "defaultBranchRef": { "name": "develop" }
+              "owner": {
+                "login": "Work-Org"
+              },
+              "defaultBranchRef": {
+                "name": "develop"
+              }
             },
-            "contributions": { "nodes": [{ "occurredAt": "2026-10-11T07:00:00Z", "commitCount": 1 }] }
+            "contributions": {
+              "nodes": [
+                {
+                  "occurredAt": "2026-10-11T07:00:00Z",
+                  "commitCount": 1
+                }
+              ]
+            }
           },
           {
             "repository": {
@@ -49,10 +85,21 @@
               "url": "https://github.com/demo-user/forked-lib",
               "isFork": true,
               "isPrivate": false,
-              "owner": { "login": "demo-user" },
-              "defaultBranchRef": { "name": "main" }
+              "owner": {
+                "login": "demo-user"
+              },
+              "defaultBranchRef": {
+                "name": "main"
+              }
             },
-            "contributions": { "nodes": [{ "occurredAt": "2026-10-09T07:00:00Z", "commitCount": 4 }] }
+            "contributions": {
+              "nodes": [
+                {
+                  "occurredAt": "2026-10-09T07:00:00Z",
+                  "commitCount": 4
+                }
+              ]
+            }
           },
           {
             "repository": {
@@ -60,10 +107,21 @@
               "url": "https://github.com/demo-user/empty-repo",
               "isFork": false,
               "isPrivate": false,
-              "owner": { "login": "demo-user" },
-              "defaultBranchRef": { "name": "main" }
+              "owner": {
+                "login": "demo-user"
+              },
+              "defaultBranchRef": {
+                "name": "main"
+              }
             },
-            "contributions": { "nodes": [{ "occurredAt": "2026-10-08T07:00:00Z", "commitCount": 1 }] }
+            "contributions": {
+              "nodes": [
+                {
+                  "occurredAt": "2026-10-08T07:00:00Z",
+                  "commitCount": 1
+                }
+              ]
+            }
           },
           {
             "repository": {
@@ -71,14 +129,26 @@
               "url": "https://github.com/demo-user/no-branch",
               "isFork": false,
               "isPrivate": false,
-              "owner": { "login": "demo-user" },
+              "owner": {
+                "login": "demo-user"
+              },
               "defaultBranchRef": null
             },
-            "contributions": { "nodes": [{ "occurredAt": "2026-10-07T07:00:00Z", "commitCount": 1 }] }
+            "contributions": {
+              "nodes": [
+                {
+                  "occurredAt": "2026-10-07T07:00:00Z",
+                  "commitCount": 1
+                }
+              ]
+            }
           }
         ],
         "pullRequestContributions": {
-          "pageInfo": { "hasNextPage": true, "endCursor": "cursor-1" },
+          "pageInfo": {
+            "hasNextPage": true,
+            "endCursor": "cursor-1"
+          },
           "nodes": [
             {
               "pullRequest": {
@@ -94,9 +164,41 @@
                   "url": "https://github.com/demo-user/gittrack",
                   "isFork": false,
                   "isPrivate": false,
-                  "owner": { "login": "demo-user" },
-                  "defaultBranchRef": { "name": "main" }
-                }
+                  "owner": {
+                    "login": "demo-user"
+                  },
+                  "defaultBranchRef": {
+                    "name": "main"
+                  }
+                },
+                "commits": {
+                  "totalCount": 2,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "f100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-13T06:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "commit": {
+                        "oid": "f200000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-13T08:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": null
               }
             },
             {
@@ -113,9 +215,30 @@
                   "url": "https://github.com/other-org/oss-project",
                   "isFork": false,
                   "isPrivate": false,
-                  "owner": { "login": "other-org" },
-                  "defaultBranchRef": { "name": "main" }
-                }
+                  "owner": {
+                    "login": "other-org"
+                  },
+                  "defaultBranchRef": {
+                    "name": "main"
+                  }
+                },
+                "commits": {
+                  "totalCount": 1,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "o100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-05T07:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": null
               }
             }
           ]
