@@ -16,9 +16,9 @@ export function repo(nameWithOwner: string, isWork = false): Repo {
 
 let shaCounter = 0;
 
-export function commit(repoName: string, authoredAt: string): Commit {
+export function commit(repoName: string, authoredAt: string, onDefault = true): Commit {
   shaCounter += 1;
-  return { sha: `sha-${shaCounter}`, repo: repoName, authoredAt };
+  return { sha: `sha-${shaCounter}`, repo: repoName, authoredAt, onDefault };
 }
 
 export function pr(overrides: Partial<PullRequest> = {}): PullRequest {
@@ -46,6 +46,7 @@ export function activity(overrides: Partial<Activity> = {}): Activity {
     pullRequests: [],
     restrictedCount: 0,
     crossCheck: [],
+    supersededCommits: [],
     ...overrides,
   };
 }

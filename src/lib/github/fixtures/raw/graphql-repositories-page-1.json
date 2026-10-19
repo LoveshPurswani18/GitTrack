@@ -1,0 +1,66 @@
+{
+  "data": {
+    "user": {
+      "repositories": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "endCursor": "repo-cursor-1"
+        },
+        "nodes": [
+          {
+            "nameWithOwner": "Work-Org/work-repo-c",
+            "url": "https://github.com/Work-Org/work-repo-c",
+            "isFork": false,
+            "isPrivate": true,
+            "owner": {
+              "login": "Work-Org"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2026-10-13T10:00:00Z"
+          },
+          {
+            "nameWithOwner": "demo-user/gittrack",
+            "url": "https://github.com/demo-user/gittrack",
+            "isFork": false,
+            "isPrivate": false,
+            "owner": {
+              "login": "demo-user"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2026-10-13T09:00:00Z"
+          },
+          {
+            "nameWithOwner": "demo-user/branch-only",
+            "url": "https://github.com/demo-user/branch-only",
+            "isFork": false,
+            "isPrivate": false,
+            "owner": {
+              "login": "demo-user"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2026-10-12T07:00:00Z"
+          },
+          {
+            "nameWithOwner": "demo-user/forked-lib",
+            "url": "https://github.com/demo-user/forked-lib",
+            "isFork": true,
+            "isPrivate": false,
+            "owner": {
+              "login": "demo-user"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2026-10-09T07:00:00Z"
+          }
+        ]
+      }
+    }
+  }
+}

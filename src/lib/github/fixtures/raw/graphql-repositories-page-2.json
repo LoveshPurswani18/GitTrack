@@ -1,0 +1,40 @@
+{
+  "data": {
+    "user": {
+      "repositories": {
+        "pageInfo": {
+          "hasNextPage": true,
+          "endCursor": "repo-cursor-2"
+        },
+        "nodes": [
+          {
+            "nameWithOwner": "Work-Org/work-repo-a",
+            "url": "https://github.com/Work-Org/work-repo-a",
+            "isFork": false,
+            "isPrivate": true,
+            "owner": {
+              "login": "Work-Org"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2026-09-01T10:00:00Z"
+          },
+          {
+            "nameWithOwner": "demo-user/ancient",
+            "url": "https://github.com/demo-user/ancient",
+            "isFork": false,
+            "isPrivate": false,
+            "owner": {
+              "login": "demo-user"
+            },
+            "defaultBranchRef": {
+              "name": "main"
+            },
+            "pushedAt": "2025-10-01T00:00:00Z"
+          }
+        ]
+      }
+    }
+  }
+}

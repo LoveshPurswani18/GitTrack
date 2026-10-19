@@ -15,7 +15,8 @@ const RATE_LIMIT_RESET_MS = 30 * 60 * 1000;
 /** A moment stored as "N days ago at HH:MM in the given UTC offset". */
 export type RelativeDate = { daysAgo: number; time: string };
 
-type RawCommit = { repo: string; daysAgo: number; time: string; count?: number };
+/** `onDefault: false` marks commits that exist only on a feature branch (default: true). */
+type RawCommit = { repo: string; daysAgo: number; time: string; count?: number; onDefault?: boolean };
 type RawPullRequest = {
   repo: string;
   number: number;
@@ -64,7 +65,12 @@ function resolveActivity(raw: RawActivity, now: Date): Activity {
   raw.commits.forEach((entry, entryIndex) => {
     const authoredAt = resolveRelativeDate(entry, now);
     for (let i = 0; i < (entry.count ?? 1); i++) {
-      commits.push({ sha: fakeSha(entry.repo, entryIndex, i, authoredAt), repo: entry.repo, authoredAt });
+      commits.push({
+        sha: fakeSha(entry.repo, entryIndex, i, authoredAt),
+        repo: entry.repo,
+        authoredAt,
+        onDefault: entry.onDefault ?? true,
+      });
     }
   });
   commits.sort((a, b) => a.authoredAt.localeCompare(b.authoredAt));
@@ -90,6 +96,7 @@ function resolveActivity(raw: RawActivity, now: Date): Activity {
     pullRequests,
     restrictedCount: raw.restrictedCount,
     crossCheck: raw.crossCheck,
+    supersededCommits: [],
   };
 }
 

@@ -3,7 +3,10 @@
     "user": {
       "contributionsCollection": {
         "pullRequestContributions": {
-          "pageInfo": { "hasNextPage": false, "endCursor": "cursor-2" },
+          "pageInfo": {
+            "hasNextPage": false,
+            "endCursor": "cursor-2"
+          },
           "nodes": [
             {
               "pullRequest": {
@@ -19,8 +22,65 @@
                   "url": "https://github.com/Work-Org/work-repo-a",
                   "isFork": false,
                   "isPrivate": true,
-                  "owner": { "login": "Work-Org" },
-                  "defaultBranchRef": { "name": "main" }
+                  "owner": {
+                    "login": "Work-Org"
+                  },
+                  "defaultBranchRef": {
+                    "name": "main"
+                  }
+                },
+                "commits": {
+                  "totalCount": 4,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "p100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-01T10:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "commit": {
+                        "oid": "p200000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-02T06:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "commit": {
+                        "oid": "k100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-02T07:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "colleague"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "commit": {
+                        "oid": "u100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-02T08:00:00Z",
+                        "author": {
+                          "user": null
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": {
+                  "oid": "m400000000000000000000000000000000000001",
+                  "parents": {
+                    "totalCount": 1
+                  }
                 }
               }
             },
@@ -38,9 +98,171 @@
                   "url": "https://github.com/Work-Org/work-repo-b",
                   "isFork": false,
                   "isPrivate": true,
-                  "owner": { "login": "Work-Org" },
-                  "defaultBranchRef": { "name": "develop" }
+                  "owner": {
+                    "login": "Work-Org"
+                  },
+                  "defaultBranchRef": {
+                    "name": "develop"
+                  }
+                },
+                "commits": {
+                  "totalCount": 1,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "x100000000000000000000000000000000000001",
+                        "authoredDate": "2026-09-21T05:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": null
+              }
+            },
+            {
+              "pullRequest": {
+                "number": 13,
+                "title": "Move the queue to a worker",
+                "url": "https://github.com/Work-Org/work-repo-b/pull/13",
+                "state": "MERGED",
+                "createdAt": "2026-10-04T08:00:00Z",
+                "mergedAt": "2026-10-07T09:00:00Z",
+                "closedAt": "2026-10-07T09:00:00Z",
+                "repository": {
+                  "nameWithOwner": "Work-Org/work-repo-b",
+                  "url": "https://github.com/Work-Org/work-repo-b",
+                  "isFork": false,
+                  "isPrivate": true,
+                  "owner": {
+                    "login": "Work-Org"
+                  },
+                  "defaultBranchRef": {
+                    "name": "develop"
+                  }
+                },
+                "commits": {
+                  "totalCount": 2,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "r100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-05T04:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "commit": {
+                        "oid": "r200000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-06T04:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": {
+                  "oid": "r400000000000000000000000000000000000001",
+                  "parents": {
+                    "totalCount": 1
+                  }
                 }
+              }
+            },
+            {
+              "pullRequest": {
+                "number": 5,
+                "title": "Add the fixtures loader",
+                "url": "https://github.com/demo-user/gittrack/pull/5",
+                "state": "MERGED",
+                "createdAt": "2026-10-08T04:00:00Z",
+                "mergedAt": "2026-10-08T07:00:00Z",
+                "closedAt": "2026-10-08T07:00:00Z",
+                "repository": {
+                  "nameWithOwner": "demo-user/gittrack",
+                  "url": "https://github.com/demo-user/gittrack",
+                  "isFork": false,
+                  "isPrivate": false,
+                  "owner": {
+                    "login": "demo-user"
+                  },
+                  "defaultBranchRef": {
+                    "name": "main"
+                  }
+                },
+                "commits": {
+                  "totalCount": 1,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "t100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-08T05:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": {
+                  "oid": "mt00000000000000000000000000000000000001",
+                  "parents": {
+                    "totalCount": 2
+                  }
+                }
+              }
+            },
+            {
+              "pullRequest": {
+                "number": 60,
+                "title": "Large refactor",
+                "url": "https://github.com/Work-Org/work-repo-c/pull/60",
+                "state": "OPEN",
+                "createdAt": "2026-10-10T04:00:00Z",
+                "mergedAt": null,
+                "closedAt": null,
+                "repository": {
+                  "nameWithOwner": "Work-Org/work-repo-c",
+                  "url": "https://github.com/Work-Org/work-repo-c",
+                  "isFork": false,
+                  "isPrivate": true,
+                  "owner": {
+                    "login": "Work-Org"
+                  },
+                  "defaultBranchRef": {
+                    "name": "main"
+                  }
+                },
+                "commits": {
+                  "totalCount": 3,
+                  "nodes": [
+                    {
+                      "commit": {
+                        "oid": "l100000000000000000000000000000000000001",
+                        "authoredDate": "2026-10-10T05:00:00Z",
+                        "author": {
+                          "user": {
+                            "login": "demo-user"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "mergeCommit": null
               }
             }
           ]
