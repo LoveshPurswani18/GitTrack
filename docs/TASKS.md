@@ -60,10 +60,10 @@ me to do them.
 - **Done when:** a `/dev/components` page (404 in production, kept through the build as a reference) shows every primitive in both themes, and it matches the design system.
 
 ### 2.2 Dashboard with controls and stats · `feat/dashboard`
-- [ ] `page.tsx` → `Dashboard` client component; skeleton until mounted (tz is browser-only)
-- [ ] `ControlBar`: range (Today/1W/1M/6M/1Y), repos (All/Personal/Work), TimezoneSelect, Refresh placeholder
-- [ ] Control state in the URL (`range`, `scope`, `tz`) via `history.replaceState`; defaults `6m`, `all`, browser tz
-- [ ] `StatsRow`: Commits today, This week vs last week, Current streak + longest, Total for range
+- [x] `page.tsx` → `Dashboard` client component; skeleton until mounted (tz is browser-only)
+- [x] `ControlBar`: range (Today/1W/1M/6M/1Y), repos (All/Personal/Work), TimezoneSelect, Refresh placeholder (no action until 3.1)
+- [x] Control state in the URL (`range`, `repos`, `tz`) via `history.replaceState`; defaults `6m`, `all`, browser tz
+- [x] `StatsRow`: Commits today, This week vs last week, Current streak + longest, Total for range
 - **Done when:** switching controls updates every number with no network request; screenshots match `dashboard-desktop` and `dashboard-mobile` (stats and controls) in both themes.
 
 ### 2.3 Activity heatmap · `feat/heatmap`
