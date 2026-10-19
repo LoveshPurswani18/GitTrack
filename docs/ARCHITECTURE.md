@@ -222,15 +222,22 @@ app/page.tsx           server: getActivity() → <Dashboard activity={…} />, o
 app/loading.tsx        skeleton dashboard (DESIGN.md §6.10)
 app/profile/page.tsx   server: getProfile() → <ProfileCard>
 components/dashboard/Dashboard.tsx   "use client": holds range, scope, tz; runs metrics in useMemo
+components/dashboard/useClientEnvironment.ts   browser clock and timezone (null on the server)
+lib/controls.ts       parse/serialise the URL controls, range labels (pure, tested)
 ```
 
-**Control state**: range, scope (repo filter) and tz live in the URL
-(`?range=1m&scope=work&tz=Asia%2FKolkata`) and are updated with
-`history.replaceState`, so there is no server round trip and links are
-shareable. Defaults (DESIGN.md §6.2): `range=6m`, `scope=all`, and tz = URL value, then the
-browser's zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`). The tz is
-only known in the browser, so `Dashboard` renders the skeleton until it has
-mounted. That is one frame, and it avoids a hydration mismatch.
+**Control state**: range, repos (repo filter) and tz live in the URL
+(`?range=1m&repos=work&tz=Asia%2FKolkata`) and are updated with
+`history.replaceState` in the change handler, so there is no server round trip and links are
+shareable. The state is the `Scope` type in code; the URL parameter is `repos`
+(DESIGN.md §6.2). Defaults: `range=6m`, `repos=all`, and tz = URL value, then the
+browser's zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`). Missing or invalid values
+fall back to the defaults, and the URL is left alone until a control changes.
+The tz and the clock are only known in the browser, so `useClientEnvironment()`
+returns `null` on the server and during hydration (`useSyncExternalStore`), and
+`Dashboard` renders the skeleton until it has a value. That is one frame, and it
+avoids a hydration mismatch. The clock is taken once per page load, so "today"
+does not roll over past midnight until a reload or the refresh in 3.1.
 
 **Theme**: follows the system; the header toggle sets `data-theme` on `<html>`
 and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
