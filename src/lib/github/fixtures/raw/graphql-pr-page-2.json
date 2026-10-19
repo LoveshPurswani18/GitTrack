@@ -1,0 +1,51 @@
+{
+  "data": {
+    "user": {
+      "contributionsCollection": {
+        "pullRequestContributions": {
+          "pageInfo": { "hasNextPage": false, "endCursor": "cursor-2" },
+          "nodes": [
+            {
+              "pullRequest": {
+                "number": 41,
+                "title": "Add the export job",
+                "url": "https://github.com/Work-Org/work-repo-a/pull/41",
+                "state": "MERGED",
+                "createdAt": "2026-10-02T08:00:00Z",
+                "mergedAt": "2026-10-03T09:00:00Z",
+                "closedAt": "2026-10-03T09:00:00Z",
+                "repository": {
+                  "nameWithOwner": "Work-Org/work-repo-a",
+                  "url": "https://github.com/Work-Org/work-repo-a",
+                  "isFork": false,
+                  "isPrivate": true,
+                  "owner": { "login": "Work-Org" },
+                  "defaultBranchRef": { "name": "main" }
+                }
+              }
+            },
+            {
+              "pullRequest": {
+                "number": 12,
+                "title": "Try a different cache layout",
+                "url": "https://github.com/Work-Org/work-repo-b/pull/12",
+                "state": "CLOSED",
+                "createdAt": "2026-09-20T08:00:00Z",
+                "mergedAt": null,
+                "closedAt": "2026-09-22T10:00:00Z",
+                "repository": {
+                  "nameWithOwner": "Work-Org/work-repo-b",
+                  "url": "https://github.com/Work-Org/work-repo-b",
+                  "isFork": false,
+                  "isPrivate": true,
+                  "owner": { "login": "Work-Org" },
+                  "defaultBranchRef": { "name": "develop" }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
