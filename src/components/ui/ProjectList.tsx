@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { repoLabels } from "@/lib/format";
 import type { ProjectCount } from "@/lib/metrics/projects";
 import { Button } from "./Button";
 import { WorkTag } from "./WorkTag";
@@ -27,6 +28,8 @@ export function ProjectList({ items, limit = 8 }: { items: ProjectCount[]; limit
   const shown = showAll ? items : items.slice(0, limit);
   // Scale against the largest count rather than assuming the caller sorted the list.
   const top = Math.max(0, ...items.map((item) => item.count));
+  // Labels are worked out over the whole list, so a collision hidden behind "Show all" still counts.
+  const labels = repoLabels(items.map((item) => item.repo));
 
   return (
     <div>
@@ -34,7 +37,9 @@ export function ProjectList({ items, limit = 8 }: { items: ProjectCount[]; limit
         {shown.map((item) => (
           <li key={item.repo} className={`${ROW} border-b border-border py-3`}>
             <span className="flex min-w-0 items-center gap-2">
-              <span className="text-body truncate text-text-primary">{item.repo}</span>
+              <span className="text-body truncate text-text-primary" title={item.repo}>
+                {labels.get(item.repo)}
+              </span>
               {item.isWork && <WorkTag />}
             </span>
             <span aria-hidden="true" className="h-1.5 rounded-full bg-surface-hover">
