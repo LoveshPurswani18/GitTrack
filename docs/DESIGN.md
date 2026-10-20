@@ -228,7 +228,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - Sits directly under the page title, above the controls' content.
 
 ### 6.10 Skeleton
-- Static `skeleton` blocks with 6px radius in the exact shape of the content (stat card: 110×14, 72×36, 120×12; heatmap: a heading bar plus a 102px block). No shimmer or pulse.
+- `skeleton` blocks with 6px radius in the exact shape of the content (stat card: 110×14, 72×36, 120×12; heatmap: a heading bar plus a 102px block). They pulse softly: opacity 1 → 0.5 → 1 over 1.6s, ease-in-out, looping. No shimmer or gradient sweep. Under `prefers-reduced-motion` they are static.
 - Wrap the loading region in `aria-busy="true"` with an `aria-label`.
 
 ### 6.11 ProfileCard
@@ -283,7 +283,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 ## 9. Interaction and motion
 
 - Transitions: only 150ms ease-out (hover, focus, colour) and 250ms ease-out (popover open). Respect `prefers-reduced-motion`.
-- Data never animates: no count-ups, no drawing in, no hover scaling.
+- Data never animates: no count-ups, no drawing in, no hover scaling. The one exception is the skeleton pulse (§6.10), which is a loading placeholder, not data.
 - Hover: `surface-hover` on interactive surfaces; links dim slightly.
 - Changing range, repos or timezone updates everything instantly from cached events; only Refresh refetches.
 - Theme: follows the system by default; the toggle sets `data-theme` on `<html>` and saves it in `localStorage`.
@@ -336,5 +336,6 @@ The state screens show the content area only; the header and controls are the sa
 
 **Known differences (the PNGs are not re-exported; the tokens in section 3 win):**
 - PR status dots: the PNGs show blue (open) and purple (merged) from the first design. The app uses GitHub's own colours: green `pr-open` and purple `pr-merged` (section 3.1). When comparing a screenshot with `dashboard-*` or `state-*`, a green open dot and a slightly different purple merged dot are expected, not a mismatch.
+- Skeleton pulse: `state-loading-*` is a still image. In the app the skeleton blocks pulse softly (section 6.10).
 
 The live, clickable mockups and the design system are in Claude Design (GitTrack v2 Screens, GitTrack design system). Update those first when the design changes, then re-export the PNGs and this file.
