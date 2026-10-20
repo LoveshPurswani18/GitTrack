@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { activity, commit, PERSONAL_REPO, WORK_REPO_A, WORK_REPO_B } from "@/test/factories";
 import { commitsByRepo } from "./projects";
 import { filterByScope } from "./filter";
+import { totalInRange } from "./summary";
 
 const bounds = { start: "2026-10-08", end: "2026-10-14" };
 const data = activity({
@@ -45,5 +46,13 @@ describe("commitsByRepo", () => {
     const sum = (scope: "all" | "personal" | "work") =>
       commitsByRepo(filterByScope(data, scope), "UTC", bounds).reduce((n, r) => n + r.count, 0);
     expect(sum("personal") + sum("work")).toBe(sum("all"));
+  });
+
+  it("adds up to the total for the range, in every scope", () => {
+    for (const scope of ["all", "personal", "work"] as const) {
+      const filtered = filterByScope(data, scope);
+      const sum = commitsByRepo(filtered, "UTC", bounds).reduce((n, r) => n + r.count, 0);
+      expect(sum).toBe(totalInRange(filtered.commits, "UTC", bounds));
+    }
   });
 });

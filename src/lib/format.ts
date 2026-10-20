@@ -18,3 +18,18 @@ export function formatDay(day: string): string {
 export function commitCount(n: number): string {
   return `${n} ${n === 1 ? "commit" : "commits"}`;
 }
+
+/** The repo name without its owner: "owner/name" becomes "name". */
+export function repoName(nameWithOwner: string): string {
+  return nameWithOwner.slice(nameWithOwner.indexOf("/") + 1);
+}
+
+/**
+ * Visible label per repo: the bare name, or "owner/name" for repos whose bare names collide,
+ * so two rows never read the same.
+ */
+export function repoLabels(repos: string[]): Map<string, string> {
+  const seen = new Map<string, number>();
+  for (const repo of repos) seen.set(repoName(repo), (seen.get(repoName(repo)) ?? 0) + 1);
+  return new Map(repos.map((repo) => [repo, seen.get(repoName(repo))! > 1 ? repo : repoName(repo)]));
+}

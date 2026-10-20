@@ -85,7 +85,7 @@ are untouched.
 - **Done when:** the 1Y view matches the design PNG, and the 01:00 IST fixture commit moves between days when the tz changes.
 
 ### 2.4 Commits by project · `feat/projects`
-- [ ] `ProjectsCard` with `ProjectList`: every repo with commits in range, count, share bar, Work tag
+- [x] `ProjectsCard` with `ProjectList`: every repo with commits in range, count, share bar, Work tag
 - **Done when:** counts add up to the Total stat, and the Work filter shows only work repos.
 
 ### 2.5 Pull requests · `feat/pull-requests`
