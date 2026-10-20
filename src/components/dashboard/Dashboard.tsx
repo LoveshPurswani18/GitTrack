@@ -5,13 +5,16 @@ import { controlsToSearch, parseControls, rangeLabel, type Controls } from "@/li
 import {
   commitsToday,
   currentStreak,
+  dailyCounts,
   filterByScope,
+  heatmapGrid,
   longestStreak,
   rangeBounds,
   thisWeekVsLast,
   totalInRange,
 } from "@/lib/metrics";
 import type { Activity } from "@/types/activity";
+import { ActivityCard, type HeatmapData } from "./ActivityCard";
 import { ControlBar } from "./ControlBar";
 import { DashboardSkeleton } from "./DashboardSkeleton";
 import { StatsRow, type Stats } from "./StatsRow";
@@ -40,25 +43,39 @@ function DashboardContent({ activity, env }: { activity: Activity; env: ClientEn
     window.history.replaceState(null, "", controlsToSearch(next));
   }
 
-  const stats = useMemo<Stats>(() => {
+  const { stats, heatmap } = useMemo(() => {
     const { range, scope, tz } = controls;
     const { commits } = filterByScope(activity, scope);
     const week = thisWeekVsLast(commits, tz, now);
-    return {
+    const bounds = rangeBounds(range, now, tz);
+    const total = totalInRange(commits, tz, bounds);
+    const stats: Stats = {
       today: commitsToday(commits, tz, now),
       thisWeek: week.thisWeek,
       delta: week.delta,
       // Streaks look at every commit in the scope, not just the selected range.
       streak: currentStreak(commits, tz, now),
       longest: longestStreak(commits, tz),
-      total: totalInRange(commits, tz, rangeBounds(range, now, tz)),
+      total,
     };
+    const heatmap: HeatmapData = {
+      weeks: heatmapGrid(dailyCounts(commits, tz, bounds), bounds).weeks,
+      total,
+      today: bounds.end,
+    };
+    return { stats, heatmap };
   }, [activity, controls, now]);
 
   return (
     <div className="flex flex-col gap-6">
       <ControlBar controls={controls} onChange={update} browserZone={browserZone} />
       <StatsRow stats={stats} rangeLabel={rangeLabel(controls.range)} tz={controls.tz} />
+      <ActivityCard
+        heatmap={heatmap}
+        range={controls.range}
+        rangeLabel={rangeLabel(controls.range)}
+        tz={controls.tz}
+      />
     </div>
   );
 }

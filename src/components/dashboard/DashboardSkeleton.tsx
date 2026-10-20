@@ -1,4 +1,4 @@
-import { Skeleton, SkeletonRegion, StatCardSkeleton } from "@/components/ui/Skeleton";
+import { HeatmapSkeleton, Skeleton, SkeletonRegion, StatCardSkeleton } from "@/components/ui/Skeleton";
 
 /** Shown while the data streams in and until the browser's timezone is known (DESIGN.md §8). */
 export function DashboardSkeleton() {
@@ -16,6 +16,7 @@ export function DashboardSkeleton() {
           <StatCardSkeleton />
           <StatCardSkeleton />
         </div>
+        <HeatmapSkeleton />
       </div>
     </SkeletonRegion>
   );
