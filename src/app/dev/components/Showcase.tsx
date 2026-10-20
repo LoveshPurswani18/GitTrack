@@ -111,7 +111,6 @@ function HeatmapSample({ range, tz, now }: { range: Range; tz: string; now: Date
         weeks={weeks}
         today={bounds.end}
         ariaLabel={`Commit activity, range ${range}`}
-        formatLabel={(cell) => `${cell.count} commits on ${cell.day}`}
       />
       <div className="mt-4 flex items-center justify-between gap-4">
         <p className="text-caption hidden text-text-muted sm:block">
