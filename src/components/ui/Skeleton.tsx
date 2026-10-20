@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { cx } from "./cx";
 
-/** Static placeholder block (no shimmer). Size it with `className`. */
+/** Placeholder block that pulses softly (static under reduced motion). Size it with `className`. */
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden="true" className={cx("rounded-[6px] bg-skeleton", className)} />;
+  return (
+    <div aria-hidden="true" className={cx("skeleton-block rounded-[6px] bg-skeleton", className)} />
+  );
 }
 
 export function SkeletonRegion({ label, children }: { label: string; children: ReactNode }) {

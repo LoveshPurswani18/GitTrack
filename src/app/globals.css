@@ -133,6 +133,26 @@ button {
   }
 }
 
+/* Skeleton pulse (DESIGN.md §6.10) */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.skeleton-block {
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+/* The blanket rule above would turn an infinite loop into a flicker, so stop it outright. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+  }
+}
+
 /* Theme-dependent visibility (logo mark and toggle icon) */
 .theme-icon-dark,
 .logo-white {
