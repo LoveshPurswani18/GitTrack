@@ -79,9 +79,9 @@ are untouched.
 - **Done when:** switching controls updates every number with no network request; screenshots match `dashboard-desktop` and `dashboard-mobile` (stats and controls) in both themes.
 
 ### 2.3 Activity heatmap · `feat/heatmap`
-- [ ] `ActivityCard` with `Heatmap`: weeks as columns, Monday first, 5 levels, layouts per range (DESIGN.md §6.5)
-- [ ] Tooltip/label per cell: "N commits on <date>"; horizontal scroll on mobile
-- [ ] Make the per-cell labels reachable: the 2.1 `Heatmap` wrapper has `role="img"`, which hides the cells' `aria-label`s from screen readers. Change the wrapper role (for example `grid`) and make cells focusable with arrow-key movement (DESIGN.md §10)
+- [x] `ActivityCard` with `Heatmap`: weeks as columns, Monday first, 5 levels, layouts per range (DESIGN.md §6.5)
+- [x] Tooltip/label per cell: "N commits on <date>"; horizontal scroll on mobile
+- [x] Make the per-cell labels reachable: the 2.1 `Heatmap` wrapper has `role="img"`, which hides the cells' `aria-label`s from screen readers. Change the wrapper role (for example `grid`) and make cells focusable with arrow-key movement (DESIGN.md §10)
 - **Done when:** the 1Y view matches the design PNG, and the 01:00 IST fixture commit moves between days when the tz changes.
 
 ### 2.4 Commits by project · `feat/projects`
