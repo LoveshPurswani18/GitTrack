@@ -20,11 +20,15 @@ export function StatsRow({
   stats,
   rangeLabel,
   tz,
+  cachedAt,
 }: {
   stats: Stats;
   rangeLabel: string;
   tz: string;
+  /** "14:05" when old data is shown after a failed refresh; replaces the live context lines. */
+  cachedAt?: string;
 }) {
+  const cachedLine = cachedAt ? `cached at ${cachedAt}` : undefined;
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] sm:gap-4">
       <StatCard
@@ -32,26 +36,36 @@ export function StatsRow({
         shortLabel="Today"
         value={stats.today}
         context={
-          stats.today === 0 ? (
+          cachedLine ??
+          (stats.today === 0 ? (
             "No commits yet today"
           ) : (
             <>
               <span className="sm:hidden">commits so far</span>
               <span className="hidden sm:inline">so far, {tz}</span>
             </>
-          )
+          ))
         }
       />
       <StatCard
         label="Commits this week"
         shortLabel="This week"
         value={stats.thisWeek}
-        delta={stats.delta}
+        delta={cachedLine || stats.delta === 0 ? undefined : stats.delta}
         deltaLabel={
           <>
             <span className="sm:hidden">vs last</span>
             <span className="hidden sm:inline">vs last week</span>
           </>
+        }
+        context={
+          cachedLine ??
+          (stats.delta === 0 ? (
+            <>
+              <span className="sm:hidden">Same as last</span>
+              <span className="hidden sm:inline">Same as last week</span>
+            </>
+          ) : undefined)
         }
       />
       <StatCard

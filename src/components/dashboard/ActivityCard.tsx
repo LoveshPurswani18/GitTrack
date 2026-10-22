@@ -21,11 +21,14 @@ export function ActivityCard({
   range,
   rangeLabel,
   tz,
+  cachedAt,
 }: {
   heatmap: HeatmapData;
   range: string;
   rangeLabel: string;
   tz: string;
+  /** "14:05" when old data is shown after a failed refresh; replaces the timezone in the caption. */
+  cachedAt?: string;
 }) {
   const { weeks, total, today } = heatmap;
   return (
@@ -39,7 +42,7 @@ export function ActivityCard({
           <span className="text-metric-sm">{total}</span> commits
           <span className="hidden sm:inline">
             {" "}
-            · {rangeLabel} · {tz}
+            · {rangeLabel} · {cachedAt ? `cached at ${cachedAt}` : tz}
           </span>
         </p>
       </div>

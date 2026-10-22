@@ -95,10 +95,10 @@ are untouched.
 ## Phase 3 — Profile, states and launch
 
 ### 3.1 Refresh and states · `feat/states`
-- [ ] Refresh server action (revalidate `github` tag) + `RefreshButton` with "Refreshing…" state
-- [ ] "Updated N min ago" from `fetchedAt`
-- [ ] Loading, empty-range, rate-limit (with reset time) and token-error states (DESIGN.md §8), driven by `GITHUB_FIXTURE_STATE`
-- [ ] `error.tsx` fallback with Try again
+- [x] Refresh server action (revalidate `github` tag) + `RefreshButton` with "Refreshing…" state
+- [x] "Updated N min ago" from `fetchedAt`
+- [x] Loading, empty-range, rate-limit (with reset time) and token-error states (DESIGN.md §8), driven by `GITHUB_FIXTURE_STATE`
+- [x] `error.tsx` fallback with Try again
 - **Done when:** each state matches its `state-*.png` in both themes.
 
 ### 3.2 Profile page · `feat/profile`

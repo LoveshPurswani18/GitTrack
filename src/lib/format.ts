@@ -47,3 +47,25 @@ export function repoLabels(repos: string[]): Map<string, string> {
   for (const repo of repos) seen.set(repoName(repo), (seen.get(repoName(repo)) ?? 0) + 1);
   return new Map(repos.map((repo) => [repo, seen.get(repoName(repo))! > 1 ? repo : repoName(repo)]));
 }
+
+/** "just now", "4 min ago", "2 hours ago" or "3 days ago" for how long ago an instant was. */
+export function timeAgo(iso: string, now: Date): string {
+  const seconds = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 1000));
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} ${days === 1 ? "day" : "days"} ago`;
+}
+
+/** "14:05": the wall-clock time of an instant in the given IANA timezone, 24-hour. */
+export function formatClock(iso: string, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  }).format(new Date(iso));
+}

@@ -1,10 +1,9 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TimezoneSelect } from "@/components/ui/TimezoneSelect";
 import { RANGE_OPTIONS, SCOPE_OPTIONS, type Controls } from "@/lib/controls";
+import { RefreshButton } from "./RefreshButton";
 
 /**
  * Range, repos, timezone and refresh. Stacked on mobile (range, repos, then timezone beside a
@@ -40,13 +39,7 @@ export function ControlBar({
           onChange={(tz) => onChange({ tz })}
           browserZone={browserZone}
         />
-        {/* Refresh does nothing yet: the server action and "Refreshing…" state come in task 3.1. */}
-        <span className="sm:hidden">
-          <Button iconOnly icon={RefreshCw} aria-label="Refresh" />
-        </span>
-        <span className="hidden sm:block">
-          <Button icon={RefreshCw}>Refresh</Button>
-        </span>
+        <RefreshButton />
       </div>
     </div>
   );

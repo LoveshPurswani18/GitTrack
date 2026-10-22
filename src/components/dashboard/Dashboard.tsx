@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { formatClock } from "@/lib/format";
 import { controlsToSearch, parseControls, rangeLabel, type Controls } from "@/lib/controls";
 import {
   commitsByRepo,
@@ -30,14 +31,30 @@ import { useClientEnvironment, type ClientEnvironment } from "./useClientEnviron
  * sent, so changing a control never touches the network. The timezone and clock only exist in
  * the browser, so a skeleton shows until they are known.
  */
-export function Dashboard({ activity }: { activity: Activity }) {
+export function Dashboard({
+  activity,
+  cachedAtIso,
+}: {
+  activity: Activity;
+  /** Set when this is old data shown after a failed refresh. */
+  cachedAtIso?: string;
+}) {
   const env = useClientEnvironment();
   if (!env) return <DashboardSkeleton />;
-  return <DashboardContent activity={activity} env={env} />;
+  return <DashboardContent activity={activity} env={env} cachedAtIso={cachedAtIso} />;
 }
 
-function DashboardContent({ activity, env }: { activity: Activity; env: ClientEnvironment }) {
+function DashboardContent({
+  activity,
+  env,
+  cachedAtIso,
+}: {
+  activity: Activity;
+  env: ClientEnvironment;
+  cachedAtIso?: string;
+}) {
   const { now, browserZone } = env;
+  const cachedAt = cachedAtIso ? formatClock(cachedAtIso, browserZone) : undefined;
   const [controls, setControls] = useState<Controls>(() =>
     parseControls(window.location.search, browserZone),
   );
@@ -82,12 +99,18 @@ function DashboardContent({ activity, env }: { activity: Activity; env: ClientEn
   return (
     <div className="flex flex-col gap-6">
       <ControlBar controls={controls} onChange={update} browserZone={browserZone} />
-      <StatsRow stats={stats} rangeLabel={rangeLabel(controls.range)} tz={controls.tz} />
+      <StatsRow
+        stats={stats}
+        rangeLabel={rangeLabel(controls.range)}
+        tz={controls.tz}
+        cachedAt={cachedAt}
+      />
       <ActivityCard
         heatmap={heatmap}
         range={controls.range}
         rangeLabel={rangeLabel(controls.range)}
         tz={controls.tz}
+        cachedAt={cachedAt}
       />
       <div className="flex flex-wrap gap-6">
         <PullRequestsCard stats={prs} recent={recent} repos={repos} tz={controls.tz} />
