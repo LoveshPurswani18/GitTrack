@@ -196,9 +196,16 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
 - The in-memory handler may not persist between requests on serverless hosting
   (Vercel). If the launch check (cached load under 2 s) fails there, switch the
   directive to `"use cache: remote"`.
-- **Refresh** is a server action in `src/app/actions.ts` that revalidates the
-  `github` tag, then calls `router.refresh()` on the client. While it runs, the
-  current data stays on screen and the button shows "Refreshing…" (DESIGN.md §8).
+- **Refresh** is a server action in `src/app/actions.ts` that calls `updateTag("github")`
+  (immediate expiry, so the next render refetches instead of serving stale data first), then
+  `router.refresh()` runs on the client. While it runs, the current data stays on screen and the
+  button shows "Refreshing…" (DESIGN.md §8). When the refreshed data arrives, `DashboardView`
+  retakes the browser clock so "today", the week and "Updated N min ago" move on.
+- **A failed refresh keeps the last good data.** `getDashboardData()` in
+  `src/lib/github/dashboard.ts` wraps `getActivity()` and returns a `DashboardResult`
+  (`src/types/dashboard.ts`): `ok` (fresh data), `stale` (the last good Activity plus the error)
+  or `error` (nothing cached). The last good Activity is kept in server memory, like the cache
+  itself, so after a restart followed by a failure the user sees "No data to show".
 - Target: a cached page load under 2 s. An uncached year took 5.95 s in the
   spike (default branch only), so caching is required. The all-branch fetch makes
   more requests (section 6), so its uncached time has to be measured on the
@@ -214,8 +221,11 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
 | `rate_limit` | 403 or 429 with `x-ratelimit-remaining: 0`; carry the reset time | Rate-limit banner with reset time |
 | `network` | fetch failed or 5xx | Error banner with Try again |
 
-`page.tsx` catches `GitHubError` and renders the matching state. Anything else
-goes to `error.tsx`. Error messages never include the token.
+`getDashboardData()` turns a `GitHubError` into a `stale` or `error` result and `DashboardView`
+renders the matching banner (`stateCopy.ts` holds the wording; times are shown in the browser's
+timezone). Anything that is not a `GitHubError` (bad configuration, a bug) is rethrown to
+`error.tsx`, which shows a generic message with no details. Error messages never include the
+token.
 
 ## 9. Metrics (`src/lib/metrics/`) — pure, tested, timezone-aware
 
@@ -255,9 +265,10 @@ last week in UTC), and a closed-unmerged PR.
 
 ```
 app/layout.tsx         fonts, theme script (data-theme before paint), <AppHeader>
-app/page.tsx           server: getActivity() → <Dashboard activity={…} />, or the error state
+app/page.tsx           server: getDashboardData() → <DashboardView result={…} />; title row with <UpdatedAgo>
 app/loading.tsx        skeleton dashboard (DESIGN.md §6.10)
 app/profile/page.tsx   server: getProfile() → <ProfileCard>
+components/dashboard/DashboardView.tsx   "use client": ok / stale / error → dashboard, banner + dashboard, or banner + no-data card
 components/dashboard/Dashboard.tsx   "use client": holds range, scope, tz; runs metrics in useMemo
 components/dashboard/useClientEnvironment.ts   browser clock and timezone (null on the server)
 lib/controls.ts       parse/serialise the URL controls, range labels (pure, tested)
@@ -298,8 +309,7 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   ├── layout.tsx
     │   ├── globals.css        # tokens + @theme inline (DESIGN.md §3.6)
     │   ├── page.tsx
-    │   ├── loading.tsx
-    │   ├── error.tsx
+    │   ├── error.tsx          # fallback for non-GitHub failures
     │   ├── actions.ts         # refresh server action
     │   └── profile/
     │       ├── page.tsx
@@ -315,11 +325,13 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   └── dashboard/         # composes ui/ with metrics
     │       ├── Dashboard.tsx  ControlBar.tsx  StatsRow.tsx
     │       ├── ActivityCard.tsx  ProjectsCard.tsx  PullRequestsCard.tsx
-    │       └── RefreshButton.tsx  States.tsx
+    │       ├── DashboardView.tsx  RefreshButton.tsx  UpdatedAgo.tsx
+    │       └── States.tsx  stateCopy.ts
     ├── lib/
     │   ├── config.ts          # env parsing, server only
     │   ├── github/            # server only
     │   │   ├── index.ts       # getActivity / getProfile, picks fixtures or live, caching
+    │   │   ├── dashboard.ts   # getDashboardData: ok / stale (last good data) / error
     │   │   ├── live.ts        # fetchLiveActivity / fetchLiveProfile, GraphQL queries
     │   │   ├── fixtures.ts
     │   │   ├── client.ts      # fetch wrapper: auth header, GraphQL + REST, pagination
