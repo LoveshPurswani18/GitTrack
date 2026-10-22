@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cx } from "./cx";
 
 export type PRStatus = "open" | "merged" | "closed";
@@ -15,7 +16,7 @@ export function PRBadge({
   status,
   className,
 }: {
-  label: string;
+  label: ReactNode;
   count?: number;
   status?: PRStatus;
   className?: string;
