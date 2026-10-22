@@ -10,6 +10,8 @@ import {
   filterByScope,
   heatmapGrid,
   longestStreak,
+  prStats,
+  recentPrs,
   rangeBounds,
   thisWeekVsLast,
   totalInRange,
@@ -19,6 +21,7 @@ import { ActivityCard, type HeatmapData } from "./ActivityCard";
 import { ControlBar } from "./ControlBar";
 import { DashboardSkeleton } from "./DashboardSkeleton";
 import { ProjectsCard } from "./ProjectsCard";
+import { PullRequestsCard } from "./PullRequestsCard";
 import { StatsRow, type Stats } from "./StatsRow";
 import { useClientEnvironment, type ClientEnvironment } from "./useClientEnvironment";
 
@@ -45,7 +48,7 @@ function DashboardContent({ activity, env }: { activity: Activity; env: ClientEn
     window.history.replaceState(null, "", controlsToSearch(next));
   }
 
-  const { stats, heatmap, projects } = useMemo(() => {
+  const { stats, heatmap, projects, prs, recent, repos } = useMemo(() => {
     const { range, scope, tz } = controls;
     const filtered = filterByScope(activity, scope);
     const { commits } = filtered;
@@ -66,7 +69,14 @@ function DashboardContent({ activity, env }: { activity: Activity; env: ClientEn
       total,
       today: bounds.end,
     };
-    return { stats, heatmap, projects: commitsByRepo(filtered, tz, bounds) };
+    return {
+      stats,
+      heatmap,
+      projects: commitsByRepo(filtered, tz, bounds),
+      prs: prStats(filtered.pullRequests, tz, bounds),
+      recent: recentPrs(filtered.pullRequests, tz, bounds),
+      repos: filtered.repos,
+    };
   }, [activity, controls, now]);
 
   return (
@@ -80,6 +90,7 @@ function DashboardContent({ activity, env }: { activity: Activity; env: ClientEn
         tz={controls.tz}
       />
       <div className="flex flex-wrap gap-6">
+        <PullRequestsCard stats={prs} recent={recent} repos={repos} tz={controls.tz} />
         <ProjectsCard projects={projects} />
       </div>
     </div>

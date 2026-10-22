@@ -14,6 +14,20 @@ export function formatDay(day: string): string {
   return `${get("weekday")}, ${get("day")} ${get("month")}`;
 }
 
+const dayMonthFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+
+/** "10 Oct" for a YYYY-MM-DD day. Formatted in UTC so no timezone can shift the date. */
+export function formatDayMonth(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  const parts = dayMonthFormatter.formatToParts(new Date(Date.UTC(year, month - 1, date)));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+  return `${get("day")} ${get("month")}`;
+}
+
 /** "1 commit" or "N commits". */
 export function commitCount(n: number): string {
   return `${n} ${n === 1 ? "commit" : "commits"}`;

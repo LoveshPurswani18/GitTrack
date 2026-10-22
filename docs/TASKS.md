@@ -89,7 +89,7 @@ are untouched.
 - **Done when:** counts add up to the Total stat, and the Work filter shows only work repos.
 
 ### 2.5 Pull requests · `feat/pull-requests`
-- [ ] `PullRequestsCard`: opened / open now / merged for the range; recent PR list with title, repo, PRBadge (open, merged, closed), Work tag, link out
+- [x] `PullRequestsCard`: opened / open now / merged for the range; recent PR list with title, repo, PRBadge (open, merged, closed), Work tag, link out
 - **Done when:** matches the design PNG, except the PR dot colours (open is GitHub green and merged is a different purple than in the PNG, by choice; see DESIGN.md §13 "Known differences"); the closed-unmerged fixture PR shows the closed badge.
 
 ## Phase 3 — Profile, states and launch

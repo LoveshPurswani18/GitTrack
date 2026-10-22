@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commitCount, formatDay, repoLabels, repoName } from "./format";
+import { commitCount, formatDay, formatDayMonth, repoLabels, repoName } from "./format";
 
 describe("formatDay", () => {
   it("formats weekday, day and month", () => {
@@ -16,6 +16,17 @@ describe("formatDay", () => {
       if (original === undefined) delete process.env.TZ;
       else process.env.TZ = original;
     }
+  });
+});
+
+describe("formatDayMonth", () => {
+  it("formats day and month with no weekday", () => {
+    expect(formatDayMonth("2026-10-10")).toBe("10 Oct");
+    expect(formatDayMonth("2026-01-05")).toBe("5 Jan");
+  });
+
+  it("spells September as Sep", () => {
+    expect(formatDayMonth("2026-09-21")).toBe("21 Sep");
   });
 });
 
