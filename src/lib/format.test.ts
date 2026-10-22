@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { commitCount, formatDay, formatDayMonth, repoLabels, repoName } from "./format";
+import {
+  commitCount,
+  formatClock,
+  formatDay,
+  formatDayMonth,
+  repoLabels,
+  repoName,
+  timeAgo,
+} from "./format";
 
 describe("formatDay", () => {
   it("formats weekday, day and month", () => {
@@ -60,5 +68,35 @@ describe("repoLabels", () => {
     expect(labels.get("me/app")).toBe("me/app");
     expect(labels.get("org/app")).toBe("org/app");
     expect(labels.get("me/dotfiles")).toBe("dotfiles");
+  });
+});
+
+describe("timeAgo", () => {
+  const now = new Date("2026-10-20T12:00:00Z");
+  const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
+
+  it("says just now under a minute, and for a clock that is slightly ahead", () => {
+    expect(timeAgo(ago(20_000), now)).toBe("just now");
+    expect(timeAgo(ago(-5_000), now)).toBe("just now");
+  });
+
+  it("counts minutes, hours and days", () => {
+    expect(timeAgo(ago(4 * 60_000), now)).toBe("4 min ago");
+    expect(timeAgo(ago(59 * 60_000), now)).toBe("59 min ago");
+    expect(timeAgo(ago(60 * 60_000), now)).toBe("1 hour ago");
+    expect(timeAgo(ago(5 * 3_600_000), now)).toBe("5 hours ago");
+    expect(timeAgo(ago(24 * 3_600_000), now)).toBe("1 day ago");
+    expect(timeAgo(ago(3 * 24 * 3_600_000), now)).toBe("3 days ago");
+  });
+});
+
+describe("formatClock", () => {
+  it("shows the same instant on different clocks in different timezones", () => {
+    expect(formatClock("2026-10-20T08:35:00Z", "UTC")).toBe("08:35");
+    expect(formatClock("2026-10-20T08:35:00Z", "Asia/Kolkata")).toBe("14:05");
+  });
+
+  it("uses a 24-hour clock with midnight as 00", () => {
+    expect(formatClock("2026-10-20T18:30:00Z", "Asia/Kolkata")).toBe("00:00");
   });
 });
