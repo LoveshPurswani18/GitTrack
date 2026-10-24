@@ -166,7 +166,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - **Primary:** `accent` fill, `on-accent` text. At most one per screen ("View on GitHub").
 - **Secondary:** `bg` fill, 1px `control-border`, `text-primary`. Hover `surface-hover`. Used for Refresh, Try again and the theme toggle (32×32 icon-only).
 - **Ghost:** no fill, `text-secondary`; hover `surface-hover`.
-- **Disabled / busy:** 50% opacity, `cursor: not-allowed`, label changes ("Refreshing…").
+- **Disabled / busy:** 50% opacity, `cursor: not-allowed`, label changes ("Refreshing…"), and the icon turns (1s linear spin; none under reduced motion).
 
 ### 6.2 SegmentedControl
 - One outlined group: 1px `control-border`, `radius-sm`, 2px inner padding, 2px gap between options, `bg` fill. 32px tall (36px on mobile).
@@ -283,7 +283,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 ## 9. Interaction and motion
 
 - Transitions: only 150ms ease-out (hover, focus, colour) and 250ms ease-out (popover open). Respect `prefers-reduced-motion`.
-- Data never animates: no count-ups, no drawing in, no hover scaling. The one exception is the skeleton pulse (§6.10), which is a loading placeholder, not data.
+- Data never animates: no count-ups, no drawing in, no hover scaling. The exceptions are the skeleton pulse (§6.10) and the busy-button icon spin (§6.1), which are loading indicators, not data.
 - Hover: `surface-hover` on interactive surfaces; links dim slightly.
 - Changing range, repos or timezone updates everything instantly from cached events; only Refresh refetches.
 - Theme: follows the system by default; the toggle sets `data-theme` on `<html>` and saves it in `localStorage`.
