@@ -4,7 +4,7 @@ import { cx } from "./cx";
 /** Placeholder block that pulses softly (static under reduced motion). Size it with `className`. */
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div aria-hidden="true" className={cx("skeleton-block rounded-[6px] bg-skeleton", className)} />
+    <div aria-hidden="true" className={cx("skeleton-block rounded-sm bg-skeleton", className)} />
   );
 }
 
@@ -30,7 +30,8 @@ export function HeatmapSkeleton() {
   return (
     <div className="flex flex-col gap-4 rounded-md border border-border bg-surface p-4 sm:p-6">
       <Skeleton className="h-5 w-[120px]" />
-      <Skeleton className="h-[102px] w-full" />
+      {/* The real grid plus its py-1: 90px at 10px cells, 110px at 12px cells. */}
+      <Skeleton className="h-[90px] w-full sm:h-[110px]" />
     </div>
   );
 }
