@@ -328,7 +328,11 @@ export async function fetchLiveActivity(input: LiveActivityInput): Promise<Activ
   };
 }
 
-export async function fetchLiveProfile(input: { username: string; client: GitHubClient }): Promise<Profile> {
+export async function fetchLiveProfile(input: {
+  username: string;
+  client: GitHubClient;
+  now: Date;
+}): Promise<Profile> {
   const raw = await input.client.rest<RawUser>(`/users/${encodeURIComponent(input.username)}`);
-  return normalizeProfile(raw);
+  return normalizeProfile(raw, input.now);
 }

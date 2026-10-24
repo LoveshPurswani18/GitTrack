@@ -63,6 +63,7 @@ const PROFILE: Profile = {
   publicRepos: 31,
   createdAt: "2016-10-04T09:00:00Z",
   url: "https://github.com/sample-person",
+  fetchedAt: "2026-10-20T09:00:00Z",
 };
 
 function Section({ title, children }: { title: string; children: ReactNode }) {

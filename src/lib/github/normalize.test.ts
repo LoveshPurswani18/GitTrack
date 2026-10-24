@@ -134,7 +134,7 @@ describe("buildCrossCheck", () => {
 
 describe("normalizeProfile", () => {
   it("maps the REST user fields", () => {
-    expect(normalizeProfile(userRaw as RawUser)).toEqual({
+    expect(normalizeProfile(userRaw as RawUser, new Date("2026-10-14T12:00:00Z"))).toEqual({
       avatarUrl: "https://avatars.githubusercontent.com/u/0",
       name: "Demo User",
       login: "demo-user",
@@ -146,6 +146,7 @@ describe("normalizeProfile", () => {
       publicRepos: 27,
       createdAt: "2022-09-01T10:00:00Z",
       url: "https://github.com/demo-user",
+      fetchedAt: "2026-10-14T12:00:00.000Z",
     });
   });
 });

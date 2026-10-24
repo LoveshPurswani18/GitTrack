@@ -345,8 +345,9 @@ describe("fetchLiveActivity", () => {
 describe("fetchLiveProfile", () => {
   it("loads and maps the user", async () => {
     const { client, fake } = setup();
-    const profile = await fetchLiveProfile({ username: "demo-user", client });
+    const profile = await fetchLiveProfile({ username: "demo-user", client, now: NOW });
     expect(profile.login).toBe("demo-user");
+    expect(profile.fetchedAt).toBe(NOW.toISOString());
     expect(profile.publicRepos).toBe(27);
     expect(fake.requests).toHaveLength(1);
   });
