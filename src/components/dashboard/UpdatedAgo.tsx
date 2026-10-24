@@ -13,13 +13,15 @@ function subscribe(onTick: () => void) {
   return () => clearInterval(id);
 }
 
-/** "Updated 4 min ago", kept current. Renders nothing until the browser clock is known. */
-export function UpdatedAgo({ fetchedAt }: { fetchedAt: string }) {
+/** "4 min ago", kept current. Null until the browser clock is known (server and hydration). */
+export function useTimeAgo(fetchedAt: string): string | null {
   const slot = useSyncExternalStore(subscribe, getSlot, getServerSlot);
-  if (slot === null) return null;
-  return (
-    <p className="text-caption text-text-muted">
-      Updated {timeAgo(fetchedAt, new Date(slot * TICK_MS))}
-    </p>
-  );
+  return slot === null ? null : timeAgo(fetchedAt, new Date(slot * TICK_MS));
+}
+
+/** "Updated 4 min ago". Renders nothing until the browser clock is known. */
+export function UpdatedAgo({ fetchedAt }: { fetchedAt: string }) {
+  const ago = useTimeAgo(fetchedAt);
+  if (ago === null) return null;
+  return <p className="text-caption text-text-muted">Updated {ago}</p>;
 }
