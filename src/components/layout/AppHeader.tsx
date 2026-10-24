@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
@@ -9,7 +10,8 @@ const NAV = [
   { href: "/profile", label: "Profile" },
 ];
 
-export function AppHeader() {
+/** `avatar` is the profile picture, passed in as a server-rendered slot so the header stays a client component. */
+export function AppHeader({ avatar }: { avatar: ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -48,7 +50,7 @@ export function AppHeader() {
             aria-label="Profile"
             className="flex h-11 w-11 items-center justify-center rounded-full sm:h-7 sm:w-7"
           >
-            <span className="h-7 w-7 rounded-full border border-border bg-surface-hover" />
+            {avatar}
           </Link>
         </div>
       </div>

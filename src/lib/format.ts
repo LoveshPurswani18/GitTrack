@@ -28,6 +28,19 @@ export function formatDayMonth(day: string): string {
   return `${get("day")} ${get("month")}`;
 }
 
+const monthYearFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** "Sep 2022" for an ISO instant, in UTC so no timezone can shift the month. */
+export function formatMonthYear(iso: string): string {
+  const parts = monthYearFormatter.formatToParts(new Date(iso));
+  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+  return `${get("month")} ${get("year")}`;
+}
+
 /** "1 commit" or "N commits". */
 export function commitCount(n: number): string {
   return `${n} ${n === 1 ? "commit" : "commits"}`;

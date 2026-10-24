@@ -34,3 +34,23 @@ export function HeatmapSkeleton() {
     </div>
   );
 }
+
+/** The profile card's shape: avatar circle, name, handle, bio, meta row, counts and the button. */
+export function ProfileCardSkeleton() {
+  return (
+    <div className="flex flex-wrap gap-8 rounded-md border border-border bg-surface p-8">
+      <div
+        aria-hidden="true"
+        className="skeleton-block h-16 w-16 rounded-full bg-skeleton sm:h-24 sm:w-24"
+      />
+      <div className="flex min-w-0 flex-1 basis-64 flex-col gap-3">
+        <Skeleton className="h-7 w-40" />
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-5 w-full max-w-[420px]" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+        <Skeleton className="h-10 w-64 max-w-full" />
+        <Skeleton className="h-9 w-36 sm:h-8" />
+      </div>
+    </div>
+  );
+}

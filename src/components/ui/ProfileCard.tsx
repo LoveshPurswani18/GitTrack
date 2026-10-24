@@ -1,13 +1,10 @@
 import { Building, Calendar, ExternalLink, MapPin } from "lucide-react";
 import type { ReactNode } from "react";
+import { formatMonthYear } from "@/lib/format";
 import type { Profile } from "@/types/profile";
+import { Avatar } from "./Avatar";
 import { Button } from "./Button";
-
-function joined(createdAt: string): string {
-  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }).format(
-    new Date(createdAt),
-  );
-}
+import { CopyUsername } from "./CopyUsername";
 
 function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
@@ -31,25 +28,16 @@ export function ProfileCard({ profile }: { profile: Profile }) {
   const name = profile.name || profile.login;
   return (
     <div className="flex flex-wrap gap-8 rounded-md border border-border bg-surface p-8">
-      {profile.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={profile.avatarUrl}
-          alt=""
-          className="h-16 w-16 rounded-full border border-border sm:h-24 sm:w-24"
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="text-title flex h-16 w-16 items-center justify-center rounded-full border border-border bg-surface-hover text-text-secondary sm:h-24 sm:w-24"
-        >
-          {name.charAt(0).toUpperCase()}
-        </span>
-      )}
+      <Avatar
+        src={profile.avatarUrl}
+        name={name}
+        className="h-16 w-16 sm:h-24 sm:w-24"
+        initialClassName="text-title"
+      />
       <div className="flex min-w-0 flex-1 basis-64 flex-col gap-3">
         <div>
           <h2 className="text-title text-text-primary">{name}</h2>
-          <p className="font-mono text-[14px] leading-5 text-text-muted">@{profile.login}</p>
+          <CopyUsername login={profile.login} />
         </div>
         {profile.bio && <p className="text-body text-text-secondary">{profile.bio}</p>}
         <div className="flex flex-wrap gap-x-5 gap-y-2">
@@ -60,7 +48,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
             <Meta icon={<Building size={16} strokeWidth={1.5} aria-hidden="true" />}>{profile.company}</Meta>
           )}
           <Meta icon={<Calendar size={16} strokeWidth={1.5} aria-hidden="true" />}>
-            Joined {joined(profile.createdAt)}
+            Joined {formatMonthYear(profile.createdAt)}
           </Meta>
         </div>
         <div className="flex flex-wrap gap-8">
