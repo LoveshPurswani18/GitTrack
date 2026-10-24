@@ -105,12 +105,12 @@ are untouched.
 - [x] `/profile`: `ProfileCard` from `getProfile()` (cached like activity), hides empty fields, links to github.com
 - [x] Header avatar uses the profile avatar on both pages
 - **Done when:** matches `profile-desktop` in both themes and works at 390 px.
-- [ ] **(me)** Check the profile page once in live mode.
+- [x] **(me)** Check the profile page once in live mode.
 
 ### 3.3 Polish and accessibility pass · `feat/polish`
-- [ ] Keyboard pass: tab order, focus visible, TimezoneSelect usable by keyboard
-- [ ] Contrast spot-check, `prefers-reduced-motion`, no layout shift on load
-- [ ] Lighthouse on fixtures: performance and accessibility ≥ 90
+- [x] Keyboard pass: tab order, focus visible, TimezoneSelect usable by keyboard
+- [x] Contrast spot-check, `prefers-reduced-motion`, no layout shift on load
+- [x] Lighthouse on fixtures: performance and accessibility ≥ 90
 - **Done when:** the DESIGN.md §12 checklist passes on every screen.
 
 ### 3.4 Pre-deploy audit · `chore/audit`
