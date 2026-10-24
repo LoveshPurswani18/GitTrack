@@ -114,7 +114,7 @@ Desktop page body: 40px top, 48px bottom. Stat cards use 20px × 24px padding on
 
 | Token | Value |
 |---|---|
-| `control-height` | 32px (36px on mobile) |
+| `control-height` | 32px (36px on mobile; the timezone select and the Refresh button are 44px on mobile so they match and meet the touch-target size) |
 | `header-height` | 56px |
 | `content-max` | 1024px, centred, 24px side padding (16px on mobile) |
 | `heatmap-cell` | 12px with 3px gap (10px with 2px gap under 640px) |
@@ -178,7 +178,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - Persist the selection in the URL: `?range=6m&repos=work&tz=Asia/Kolkata`.
 
 ### 6.3 TimezoneSelect
-- Trigger: secondary-style outline, 32px, `Globe` icon + zone name + `ChevronDown`, both icons `text-muted`. On mobile it fills the row next to a 44px icon-only Refresh button.
+- Trigger: secondary-style outline, 32px (44px on mobile, level with the Refresh button), `Globe` icon + zone name + `ChevronDown`, both icons `text-muted`. On mobile it fills the row next to a 44px icon-only Refresh button.
 - Popover: `surface`, 1px `border`, `radius-md`, `shadow-popover`, 4px padding, min 240px wide, z 50.
 - Rows: zone name left, current UTC offset right in mono `text-muted` (e.g. `UTC+5:30`). Selected row `accent-subtle` / `accent-text`.
 - Pinned first: the browser's zone, `Asia/Kolkata`, `UTC`. Then a search field and all IANA zones alphabetically.

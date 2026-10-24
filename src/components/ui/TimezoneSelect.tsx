@@ -111,7 +111,7 @@ export function TimezoneSelect({
           setNow(new Date());
           setOpen((o) => !o);
         }}
-        className="text-label inline-flex h-9 w-full items-center gap-2 rounded-sm border border-control-border bg-bg px-3 text-text-primary hover:bg-surface-hover sm:h-8 sm:w-auto"
+        className="text-label inline-flex h-11 w-full items-center gap-2 rounded-sm border border-control-border bg-bg px-3 text-text-primary hover:bg-surface-hover sm:h-8 sm:w-auto"
       >
         <Globe size={16} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-text-muted" />
         <span className="truncate">{value}</span>
