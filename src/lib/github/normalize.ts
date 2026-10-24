@@ -331,7 +331,7 @@ export function buildCrossCheck(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function normalizeProfile(raw: RawUser): Profile {
+export function normalizeProfile(raw: RawUser, now: Date): Profile {
   return {
     avatarUrl: raw.avatar_url,
     name: raw.name,
@@ -344,5 +344,6 @@ export function normalizeProfile(raw: RawUser): Profile {
     publicRepos: raw.public_repos,
     createdAt: raw.created_at,
     url: raw.html_url,
+    fetchedAt: now.toISOString(),
   };
 }

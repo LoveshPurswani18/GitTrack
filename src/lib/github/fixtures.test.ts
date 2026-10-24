@@ -161,6 +161,10 @@ describe("loadFixtureProfile", () => {
     expect(profile.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T.*Z$/);
   });
 
+  it("stamps the fetch time with now", () => {
+    expect(loadFixtureProfile(null, NOW).fetchedAt).toBe(NOW.toISOString());
+  });
+
   it("does not depend on the empty state", () => {
     expect(loadFixtureProfile("empty", NOW).login).toBe("demo-user");
   });

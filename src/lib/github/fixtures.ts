@@ -35,7 +35,7 @@ type RawActivity = {
   restrictedCount: number;
   crossCheck: { date: string; count: number }[];
 };
-type RawProfile = Omit<Profile, "createdAt"> & { createdAt: RelativeDate };
+type RawProfile = Omit<Profile, "createdAt" | "fetchedAt"> & { createdAt: RelativeDate };
 
 const TIME_PATTERN = /^(\d{2}):(\d{2})([+-])(\d{2}):(\d{2})$/;
 
@@ -120,5 +120,5 @@ export function loadFixtureActivity(state: FixtureState | null, now: Date): Acti
 export function loadFixtureProfile(state: FixtureState | null, now: Date): Profile {
   throwForState(state, now);
   const raw = profileRaw as RawProfile;
-  return { ...raw, createdAt: resolveRelativeDate(raw.createdAt, now) };
+  return { ...raw, createdAt: resolveRelativeDate(raw.createdAt, now), fetchedAt: now.toISOString() };
 }

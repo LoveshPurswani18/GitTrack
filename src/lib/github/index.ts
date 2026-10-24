@@ -57,7 +57,7 @@ async function getLiveProfile(): Promise<Cached<Profile>> {
   cacheTag("github");
   const result = await attempt(() => {
     const { client, username } = liveClient();
-    return fetchLiveProfile({ client, username });
+    return fetchLiveProfile({ client, username, now: new Date() });
   });
   if (result.ok) cacheLife(LIVE_LIFETIME);
   else cacheLife("seconds");

@@ -153,7 +153,7 @@ Header lockup: mark at 20px, `space-2` gap, "GitTrack" in Geist 600 16px. Below 
 
 ## 5. Icons
 
-[Lucide](https://lucide.dev) (`lucide-react`), 16px, stroke width 1.5, coloured by context (`text-muted` in labels and controls, `accent` for the streak flame, `danger` / `warning` in banners). Icons used: `Moon` / `Sun` (theme), `Globe`, `ChevronDown`, `RefreshCw`, `Flame`, `MapPin`, `Building`, `Calendar`, `ExternalLink`, `Clock` (rate limit), `CircleAlert` (error). Icon-only buttons need an `aria-label`. No emoji.
+[Lucide](https://lucide.dev) (`lucide-react`), 16px, stroke width 1.5, coloured by context (`text-muted` in labels and controls, `accent` for the streak flame, `danger` / `warning` in banners). Icons used: `Moon` / `Sun` (theme), `Globe`, `ChevronDown`, `RefreshCw`, `Flame`, `MapPin`, `Building`, `Calendar`, `ExternalLink`, `Copy` / `Check` (copy username), `Clock` (rate limit), `CircleAlert` (error). Icon-only buttons need an `aria-label`. No emoji.
 
 ---
 
@@ -234,7 +234,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 ### 6.11 ProfileCard
 - `surface` card, 1px `border`, `radius-md`, 32px padding, 32px gap, wraps on small screens.
 - Avatar: 96px circle with a 1px `border` (the GitHub avatar image; an initial on `surface-hover` as fallback). 64px and stacked above the text on mobile.
-- Name (`title`), `@login` (mono 14px `text-muted`), bio (`body` `text-secondary`; hidden if empty).
+- Name (`title`), `@login` (mono 14px `text-muted`; a button that copies the login, without the `@`, to the clipboard, with a `Copy` icon that becomes a `Check` for 1.5 s), bio (`body` `text-secondary`; hidden if empty).
 - Meta row (13px `text-secondary`, 20px gaps): `MapPin` location · `Building` company · `Calendar` "Joined Mon YYYY"; icons 16px `text-muted`. Hide empty fields.
 - Counts: Followers · Following · Public repos, as a `caption` label over a `metric` number, 32px apart.
 - Primary button "View on GitHub" + `ExternalLink`, linking to `html_url` in a new tab (`rel="noopener noreferrer"`).
