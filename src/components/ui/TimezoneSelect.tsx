@@ -80,6 +80,13 @@ export function TimezoneSelect({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Home" && !query) {
+      // With text in the search box, Home/End keep moving the text cursor.
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === "End" && !query) {
+      e.preventDefault();
+      setActive(visible.length - 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (visible[active]) choose(visible[active]);
@@ -98,6 +105,7 @@ export function TimezoneSelect({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={`Timezone: ${value}`}
         onClick={() => {
           setActive(Math.max(0, [...pinned, ...rest].indexOf(value)));
           setNow(new Date());

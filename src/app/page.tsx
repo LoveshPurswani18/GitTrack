@@ -10,7 +10,7 @@ const loadDashboard = cache(getDashboardData);
 
 export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+    <main id="main" className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
         <div>
           <h1 className="text-title">Activity</h1>

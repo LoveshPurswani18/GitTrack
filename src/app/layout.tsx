@@ -34,6 +34,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-text-primary">
+        <a
+          href="#main"
+          className="text-label sr-only rounded-sm border border-control-border bg-bg px-3 py-1.5 text-text-primary focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-60"
+        >
+          Skip to content
+        </a>
         <AppHeader
           avatar={
             <Suspense fallback={<AvatarPlaceholder />}>
