@@ -4,6 +4,7 @@ import {
   formatClock,
   formatDay,
   formatDayMonth,
+  formatMonthYear,
   repoLabels,
   repoName,
   timeAgo,
@@ -35,6 +36,21 @@ describe("formatDayMonth", () => {
 
   it("spells September as Sep", () => {
     expect(formatDayMonth("2026-09-21")).toBe("21 Sep");
+  });
+});
+
+describe("formatMonthYear", () => {
+  it("formats the short month and the year", () => {
+    expect(formatMonthYear("2022-10-01T10:00:00Z")).toBe("Oct 2022");
+    expect(formatMonthYear("2016-01-31T23:59:00Z")).toBe("Jan 2016");
+  });
+
+  it("spells September as Sep", () => {
+    expect(formatMonthYear("2022-09-01T10:00:00Z")).toBe("Sep 2022");
+  });
+
+  it("uses the UTC month, not the local one", () => {
+    expect(formatMonthYear("2022-08-31T20:00:00Z")).toBe("Aug 2022");
   });
 });
 
