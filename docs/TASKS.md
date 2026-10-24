@@ -102,8 +102,8 @@ are untouched.
 - **Done when:** each state matches its `state-*.png` in both themes.
 
 ### 3.2 Profile page · `feat/profile`
-- [ ] `/profile`: `ProfileCard` from `getProfile()` (cached like activity), hides empty fields, links to github.com
-- [ ] Header avatar uses the profile avatar on both pages
+- [x] `/profile`: `ProfileCard` from `getProfile()` (cached like activity), hides empty fields, links to github.com
+- [x] Header avatar uses the profile avatar on both pages
 - **Done when:** matches `profile-desktop` in both themes and works at 390 px.
 - [ ] **(me)** Check the profile page once in live mode.
 

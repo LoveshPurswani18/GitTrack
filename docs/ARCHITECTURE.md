@@ -118,7 +118,8 @@ export type Activity = {
 ```
 
 `src/types/profile.ts` holds `Profile`: avatarUrl, name, login, bio, location,
-company, followers, following, publicRepos, createdAt, url.
+company, followers, following, publicRepos, createdAt, url, and `fetchedAt` (when it was
+fetched, shown as "Updated N min ago"; taken inside the cached function in live mode).
 
 Commit messages are never fetched or stored, because the app doesn't need them.
 
@@ -177,7 +178,10 @@ large PRs. Everything is wrapped by the 15 minute cache (section 7).
 argument (`config.ts` is the only place that reads `process.env`) and an injectable
 `fetch`, so tests run without a network.
 
-`getProfile()` makes one call to `GET /users/{username}` (`fetchLiveProfile`).
+`getProfile()` makes one call to `GET /users/{username}` (`fetchLiveProfile`). The profile page
+and the header avatar read it through `getProfileData()` (`src/lib/github/profile.ts`), which
+returns `ok` or `error`. A failed profile fetch shows a banner and no card (DESIGN.md §8), so
+there is no last-good fallback as on the dashboard.
 
 All GitHub code lives in `src/lib/github/`, and each file starts with
 `import "server-only"`. No client component imports from it.
@@ -267,7 +271,8 @@ last week in UTC), and a closed-unmerged PR.
 app/layout.tsx         fonts, theme script (data-theme before paint), <AppHeader>
 app/page.tsx           server: getDashboardData() → <DashboardView result={…} />; title row with <UpdatedAgo>
 app/loading.tsx        skeleton dashboard (DESIGN.md §6.10)
-app/profile/page.tsx   server: getProfile() → <ProfileCard>
+app/profile/page.tsx   server: getProfileData() → <ProfileView> (card + caption, or a banner)
+components/layout/HeaderAvatar.tsx   server: the profile avatar for <AppHeader>, neutral circle on failure
 components/dashboard/DashboardView.tsx   "use client": ok / stale / error → dashboard, banner + dashboard, or banner + no-data card
 components/dashboard/Dashboard.tsx   "use client": holds range, scope, tz; runs metrics in useMemo
 components/dashboard/useClientEnvironment.ts   browser clock and timezone (null on the server)
@@ -312,16 +317,17 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   ├── error.tsx          # fallback for non-GitHub failures
     │   ├── actions.ts         # refresh server action
     │   └── profile/
-    │       ├── page.tsx
-    │       └── loading.tsx
+    │       └── page.tsx
     ├── components/
     │   ├── ui/                # DESIGN.md §6 primitives, no data logic
     │   │   ├── Button.tsx  SegmentedControl.tsx  TimezoneSelect.tsx
     │   │   ├── StatCard.tsx  Heatmap.tsx  ProjectList.tsx  PRBadge.tsx
-    │   │   └── WorkTag.tsx  Banner.tsx  Skeleton.tsx  ProfileCard.tsx
+    │   │   └── WorkTag.tsx  Banner.tsx  Skeleton.tsx  ProfileCard.tsx  Avatar.tsx
     │   ├── layout/
-    │   │   ├── AppHeader.tsx
+    │   │   ├── AppHeader.tsx  HeaderAvatar.tsx
     │   │   └── ThemeToggle.tsx
+    │   ├── profile/
+    │   │   └── ProfileView.tsx
     │   └── dashboard/         # composes ui/ with metrics
     │       ├── Dashboard.tsx  ControlBar.tsx  StatsRow.tsx
     │       ├── ActivityCard.tsx  ProjectsCard.tsx  PullRequestsCard.tsx
@@ -332,6 +338,7 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │   ├── github/            # server only
     │   │   ├── index.ts       # getActivity / getProfile, picks fixtures or live, caching
     │   │   ├── dashboard.ts   # getDashboardData: ok / stale (last good data) / error
+    │   │   ├── profile.ts     # getProfileData: ok / error
     │   │   ├── live.ts        # fetchLiveActivity / fetchLiveProfile, GraphQL queries
     │   │   ├── fixtures.ts
     │   │   ├── client.ts      # fetch wrapper: auth header, GraphQL + REST, pagination
