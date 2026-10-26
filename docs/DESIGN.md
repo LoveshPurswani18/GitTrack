@@ -114,7 +114,7 @@ Desktop page body: 40px top, 48px bottom. Stat cards use 20px × 24px padding on
 
 | Token | Value |
 |---|---|
-| `control-height` | 32px (36px on mobile) |
+| `control-height` | 32px (36px on mobile; the timezone select and the Refresh button are 44px on mobile so they match and meet the touch-target size) |
 | `header-height` | 56px |
 | `content-max` | 1024px, centred, 24px side padding (16px on mobile) |
 | `heatmap-cell` | 12px with 3px gap (10px with 2px gap under 640px) |
@@ -166,7 +166,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - **Primary:** `accent` fill, `on-accent` text. At most one per screen ("View on GitHub").
 - **Secondary:** `bg` fill, 1px `control-border`, `text-primary`. Hover `surface-hover`. Used for Refresh, Try again and the theme toggle (32×32 icon-only).
 - **Ghost:** no fill, `text-secondary`; hover `surface-hover`.
-- **Disabled / busy:** 50% opacity, `cursor: not-allowed`, label changes ("Refreshing…").
+- **Disabled / busy:** 50% opacity, `cursor: not-allowed`, label changes ("Refreshing…"), and the icon turns (1s linear spin; none under reduced motion).
 
 ### 6.2 SegmentedControl
 - One outlined group: 1px `control-border`, `radius-sm`, 2px inner padding, 2px gap between options, `bg` fill. 32px tall (36px on mobile).
@@ -178,7 +178,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - Persist the selection in the URL: `?range=6m&repos=work&tz=Asia/Kolkata`.
 
 ### 6.3 TimezoneSelect
-- Trigger: secondary-style outline, 32px, `Globe` icon + zone name + `ChevronDown`, both icons `text-muted`. On mobile it fills the row next to a 44px icon-only Refresh button.
+- Trigger: secondary-style outline, 32px (44px on mobile, level with the Refresh button), `Globe` icon + zone name + `ChevronDown`, both icons `text-muted`. On mobile it fills the row next to a 44px icon-only Refresh button.
 - Popover: `surface`, 1px `border`, `radius-md`, `shadow-popover`, 4px padding, min 240px wide, z 50.
 - Rows: zone name left, current UTC offset right in mono `text-muted` (e.g. `UTC+5:30`). Selected row `accent-subtle` / `accent-text`.
 - Pinned first: the browser's zone, `Asia/Kolkata`, `UTC`. Then a search field and all IANA zones alphabetically.
@@ -283,7 +283,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 ## 9. Interaction and motion
 
 - Transitions: only 150ms ease-out (hover, focus, colour) and 250ms ease-out (popover open). Respect `prefers-reduced-motion`.
-- Data never animates: no count-ups, no drawing in, no hover scaling. The one exception is the skeleton pulse (§6.10), which is a loading placeholder, not data.
+- Data never animates: no count-ups, no drawing in, no hover scaling. The exceptions are the skeleton pulse (§6.10) and the busy-button icon spin (§6.1), which are loading indicators, not data.
 - Hover: `surface-hover` on interactive surfaces; links dim slightly.
 - Changing range, repos or timezone updates everything instantly from cached events; only Refresh refetches.
 - Theme: follows the system by default; the toggle sets `data-theme` on `<html>` and saves it in `localStorage`.

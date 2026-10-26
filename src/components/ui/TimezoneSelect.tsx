@@ -80,6 +80,13 @@ export function TimezoneSelect({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Home" && !query) {
+      // With text in the search box, Home/End keep moving the text cursor.
+      e.preventDefault();
+      setActive(0);
+    } else if (e.key === "End" && !query) {
+      e.preventDefault();
+      setActive(visible.length - 1);
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (visible[active]) choose(visible[active]);
@@ -98,12 +105,13 @@ export function TimezoneSelect({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={`Timezone: ${value}`}
         onClick={() => {
           setActive(Math.max(0, [...pinned, ...rest].indexOf(value)));
           setNow(new Date());
           setOpen((o) => !o);
         }}
-        className="text-label inline-flex h-9 w-full items-center gap-2 rounded-sm border border-control-border bg-bg px-3 text-text-primary hover:bg-surface-hover sm:h-8 sm:w-auto"
+        className="text-label inline-flex h-11 w-full items-center gap-2 rounded-sm border border-control-border bg-bg px-3 text-text-primary hover:bg-surface-hover sm:h-8 sm:w-auto"
       >
         <Globe size={16} strokeWidth={1.5} aria-hidden="true" className="shrink-0 text-text-muted" />
         <span className="truncate">{value}</span>

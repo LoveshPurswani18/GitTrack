@@ -62,7 +62,15 @@ export function Button(props: Props) {
     inactive && "cursor-not-allowed opacity-50",
     className,
   );
-  const icon = Icon && <Icon size={16} strokeWidth={1.5} aria-hidden="true" />;
+  // While busy the icon turns (a loading indicator, DESIGN.md §9); not at all under reduced motion.
+  const icon = Icon && (
+    <Icon
+      size={16}
+      strokeWidth={1.5}
+      aria-hidden="true"
+      className={busy ? "animate-spin motion-reduce:animate-none" : undefined}
+    />
+  );
   const content = iconOnly ? (
     icon
   ) : (

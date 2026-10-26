@@ -50,7 +50,7 @@ me to do them.
 - [x] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
 - [x] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
-- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.4 and returns 404 in production.)
+- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.5 and returns 404 in production.)
 
 ### 1.5 All-branch commits · `feat/all-branches`
 Added 19 Oct: most work lives on feature branches, so counting the default branch only
@@ -105,15 +105,35 @@ are untouched.
 - [x] `/profile`: `ProfileCard` from `getProfile()` (cached like activity), hides empty fields, links to github.com
 - [x] Header avatar uses the profile avatar on both pages
 - **Done when:** matches `profile-desktop` in both themes and works at 390 px.
-- [ ] **(me)** Check the profile page once in live mode.
+- [x] **(me)** Check the profile page once in live mode.
 
 ### 3.3 Polish and accessibility pass · `feat/polish`
-- [ ] Keyboard pass: tab order, focus visible, TimezoneSelect usable by keyboard
-- [ ] Contrast spot-check, `prefers-reduced-motion`, no layout shift on load
-- [ ] Lighthouse on fixtures: performance and accessibility ≥ 90
+- [x] Keyboard pass: tab order, focus visible, TimezoneSelect usable by keyboard
+- [x] Contrast spot-check, `prefers-reduced-motion`, no layout shift on load
+- [x] Lighthouse on fixtures: performance and accessibility ≥ 90
 - **Done when:** the DESIGN.md §12 checklist passes on every screen.
 
-### 3.4 Deploy · merge `v2` → `main`
+### 3.4 Pre-deploy audit · `chore/audit`
+Whole-app audit before `v2` goes to `main`, all on one branch. Scaled to a single-user
+dashboard that will sit on a public domain with no auth, a write-capable token and work
+repo names. Findings are fixed in this branch or logged in the Parking lot with a reason. Claude Code runs everything on
+fixtures; **(me)** lines need live data or my accounts.
+- [ ] **Secrets and token:** no `NEXT_PUBLIC_` secret; `server-only` in every `lib/github` file; GitHub calls only from server code; token string absent from the `.next/static` client bundle after a build; `.env*` ignored and never in git history; **(me)** swap the classic token for a fine-grained read-only one if it can still see the work org
+- [ ] **Company boundary:** search code, fixtures, tests, docs, `spike/`, `dev-test/` screenshots and git history for real work repo names, PR titles and commit messages; **(me)** supply the search terms from a file outside the repo
+- [ ] **Exposure if the link leaks:** list exactly what an anonymous visitor can see or trigger (repo names, PR titles, work repos, profile data, Refresh, the raw activity payload in the page HTML or RSC data, any API route or server action); confirm private-repo and work-org data reaches the browser only as far as the UI needs; test with `curl` against a production build with no cookies; **(me)** decide with WhatBuilds in mind whether work repo names and PR titles may appear on a public URL at all, or whether `Work` items should be hidden/obscured until auth exists
+- [ ] **Public surface:** `pnpm build && pnpm start`, then `/dev/components` and `/dev/live-check` return 404; security headers (frame, referrer, content-type) and `noindex` set; error and state pages show no stack, token or raw API text; the Refresh server action cannot be abused to burn the rate limit (add a cooldown or document why not)
+- [ ] **Dependencies:** `pnpm audit` (prod deps must be clean; the known dev-only `braces` advisory is recorded), unused deps, lockfile consistent, `engines`/`packageManager` match Vercel
+- [ ] **Metrics are solid:** every definition in PRD §Metric definitions maps to a pure function and a test (active day, both streaks, this week vs last, range total, per-project share, PR opened/open/merged); add any missing case (empty range, streak ending yesterday vs broken today, Monday week boundary, 01:00 IST commit in UTC vs IST, superseded commits, feature-branch-only commits, fork and duplicate sha); check that stat cards, heatmap, project list and range total always agree for every range, repo scope and timezone; metrics have no `Date.now()` and no React or `lib/github` imports; **(me)** repeat the 30-random-day and streak check on the final build, in step 3.5
+- [ ] **Resilience and cost:** each fixture state (empty, `rate_limit`, `token_error`, network) renders correctly; live fetch fails loudly rather than undercounting; uncached load time and GitHub rate-limit use measured via `/dev/live-check` **(me)**; cache is 15 min and Refresh invalidates only the `github` tag
+- [ ] **Code health:** `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` clean; no `console.log`, dead code or stray TODOs; `coderabbit-review` over the full `main...v2` diff, plus `/security-review` as a second pass
+- [ ] **Design-system conformance:** repo-wide search for raw hex, `shadow`, blur, gradients and off-scale spacing outside `tokens.css`; mono used for numbers only; quick re-check that 3.3 left every screen and state matching its PNG in both themes at 390 and 1280 px
+- [ ] **Repo and docs hygiene:** README describes v2, not the old Vite app; no leftover Vite files, `package-lock.json` or temp files in the `v2` → `main` diff; PRD, ARCHITECTURE and TASKS match what was built; `.coderabbit.yaml` decision from the Parking lot
+- [ ] **Deploy readiness:** env var names in ARCHITECTURE §4 match what the code reads; `GITHUB_DATA` cannot reach `live` by accident (preview vs production); **(me)** a Vercel preview with live env loads once before the merge
+- [ ] **Auth verdict:** from the exposure findings, recommend in `docs/AUDIT.md` whether authentication must come immediately after the MVP or can wait, with the cheapest stopgap if needed (for example Vercel deployment protection or a shared-secret gate); update the PRD risk row and "After the MVP" order to match
+- [ ] Write the results (what was checked, what was found, what was fixed or accepted) into `docs/AUDIT.md`
+- **Done when:** every box above is ticked or has an accepted-risk note in `docs/AUDIT.md`, the auth verdict is recorded, and nothing found is rated high.
+
+### 3.5 Deploy · merge `v2` → `main`
 - [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which turn off Vercel deploys while `main` still holds the old Vite app
 - [ ] **(me)** Vercel env vars: `GITHUB_TOKEN`, `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live`; framework preset Next.js
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
