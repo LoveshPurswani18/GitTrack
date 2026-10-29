@@ -50,3 +50,19 @@ describe("longestStreak", () => {
     expect(longestStreak(commits, "UTC")).toBe(1);
   });
 });
+
+describe("streaks in the selected timezone", () => {
+  // 20:00Z is the 15th in IST and the 14th in UTC; the commits sit on the 11th to 13th.
+  const now = new Date("2026-10-14T20:00:00Z");
+  const commits = ["2026-10-11", "2026-10-12", "2026-10-13"].map(onDay);
+
+  it("a streak that ended yesterday in UTC is already broken in IST", () => {
+    expect(currentStreak(commits, "UTC", now)).toBe(3);
+    expect(currentStreak(commits, "Asia/Kolkata", now)).toBe(0);
+  });
+
+  it("counts a run across a month and year boundary", () => {
+    const run = ["2025-12-30", "2025-12-31", "2026-01-01", "2026-01-02"].map(onDay);
+    expect(longestStreak(run, "UTC")).toBe(4);
+  });
+});

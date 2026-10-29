@@ -220,6 +220,27 @@ describe("pull request commits", () => {
     expect(normalizePullRequestCommits(byNumber(41), "DEMO-User", WINDOW).commits).toHaveLength(2);
   });
 
+  it("counts only commits I authored: out-of-window, unlinked, null-author and co-authored-only commits are skipped", () => {
+    const raw: RawPullRequest = {
+      ...byNumber(41),
+      commits: {
+        totalCount: 6,
+        nodes: [
+          { commit: { oid: "mine", authoredDate: "2026-10-10T10:00:00Z", author: { user: { login: "demo-user" } } } },
+          { commit: { oid: "old", authoredDate: "2025-10-15T11:59:59Z", author: { user: { login: "demo-user" } } } },
+          { commit: { oid: "nouser", authoredDate: "2026-10-10T10:00:00Z", author: { user: null } } },
+          { commit: { oid: "noauthor", authoredDate: "2026-10-10T10:00:00Z", author: null } },
+          // Someone else authored it and added me as a co-author in the message: not my commit.
+          { commit: { oid: "coauth", authoredDate: "2026-10-10T10:00:00Z", author: { user: { login: "teammate" } } } },
+          { commit: { oid: "mine", authoredDate: "2026-10-10T10:00:00Z", author: { user: { login: "demo-user" } } } },
+        ],
+      },
+    };
+    const result = normalizePullRequestCommits(raw, "demo-user", WINDOW);
+    expect(result.commits.map((c) => c.sha)).toEqual(["mine"]);
+    expect(result.complete).toBe(true);
+  });
+
   it("tells squash and rebase merges (one parent) from a true merge (two parents)", () => {
     expect(normalizePullRequestCommits(byNumber(41), "demo-user", WINDOW)).toMatchObject({
       rewritten: true,
