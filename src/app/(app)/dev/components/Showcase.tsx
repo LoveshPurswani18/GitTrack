@@ -99,7 +99,7 @@ function HeatmapSample({ range, tz, now }: { range: Range; tz: string; now: Date
       weeks: heatmapGrid(daily, bounds).weeks,
       total: [...daily.values()].reduce((a, b) => a + b, 0),
     };
-  }, [bounds.start, bounds.end]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [bounds.start, bounds.end]); // eslint-disable-line react-hooks/exhaustive-deps -- `bounds` is rebuilt each render; its two strings are the real inputs
   return (
     <div className="rounded-md border border-border bg-surface p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
