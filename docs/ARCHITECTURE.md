@@ -51,7 +51,8 @@ GitHub REST ─────┘          │                              cached 
 | `fixtures` (default) | `src/lib/github/fixtures/*.json`, made-up repos and PRs | Tests, every Claude Code session, Playwright checks |
 | `live` | GitHub GraphQL + REST with `GITHUB_TOKEN` | Me, running locally; Vercel |
 
-If `GITHUB_DATA` is missing or anything other than `live`, use fixtures.
+If `GITHUB_DATA` is missing, use fixtures; if it is `live`, use live data. Any other value
+makes the server throw, so a typo fails loudly instead of showing sample data.
 Claude Code never sets `live` (see CLAUDE.md, "Work data and the company
 boundary").
 
