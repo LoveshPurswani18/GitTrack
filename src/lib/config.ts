@@ -21,7 +21,11 @@ function clean(value: string | undefined): string | undefined {
 }
 
 export function parseConfig(env: Env): Config {
-  const dataSource: DataSource = clean(env.GITHUB_DATA) === "live" ? "live" : "fixtures";
+  const requested = clean(env.GITHUB_DATA);
+  if (requested !== undefined && requested !== "live" && requested !== "fixtures") {
+    throw new Error('GITHUB_DATA must be "live" or "fixtures"');
+  }
+  const dataSource: DataSource = requested === "live" ? "live" : "fixtures";
   const token = clean(env.GITHUB_TOKEN);
   const username = clean(env.GITHUB_USERNAME);
   const workOrg = clean(env.WORK_ORG);
