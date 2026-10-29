@@ -68,7 +68,8 @@ applies in every data mode.
 | `GITHUB_TOKEN` | `ghp_…` | Server only. Classic PAT: `repo`, `read:org`, `read:user`. Never `NEXT_PUBLIC_`. |
 | `GITHUB_USERNAME` | `LoveshPurswani18` | Author filter and profile lookup |
 | `WORK_ORG` | (set in env only) | Repos owned by this org get `isWork: true`. Never hard-code its value. |
-| `GITHUB_DATA` | `fixtures` | `fixtures` or `live` |
+| `GITHUB_DATA` | `fixtures` | `fixtures` or `live`. Unset means `fixtures`; any other value makes the server throw, so a typo in Vercel fails loudly instead of showing sample data. |
+| `GITHUB_FIXTURE_STATE` | `rate_limit` | Fixtures mode only, for Playwright: `empty`, `rate_limit` or `token_error`. Ignored in live mode. |
 | `AUTH_KEY_HASH` | 64 hex characters | Access gate: the SHA-256 of the access key, lowercase hex. Server only; type Secret in Vercel (write-only after saving). |
 | `AUTH_COOKIE_SECRET` | 32+ random characters | Access gate: signs the session cookie (`openssl rand -base64 32`). Server only; type Secret in Vercel (write-only after saving). |
 
@@ -223,6 +224,11 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
   `router.refresh()` runs on the client. While it runs, the current data stays on screen and the
   button shows "Refreshing…" (DESIGN.md §8). When the refreshed data arrives, `DashboardView`
   retakes the browser clock so "today", the week and "Updated N min ago" move on.
+- **The browser gets a trimmed copy.** `toActivityView` (`dashboard.ts`) cuts the Activity down to
+  `ActivityView` (`src/types/activity.ts`): repo name, url and `isWork`; commit repo and time; the
+  pull requests; `fetchedAt`. Shas, `onDefault`, `crossCheck`, `supersededCommits`, window bounds,
+  `restrictedCount` and the username never leave the server. `/dev/live-check` is the only reader
+  of the full Activity.
 - **A failed refresh keeps the last good data.** `getDashboardData()` in
   `src/lib/github/dashboard.ts` wraps `getActivity()` and returns a `DashboardResult`
   (`src/types/dashboard.ts`): `ok` (fresh data), `stale` (the last good Activity plus the error)
@@ -247,7 +253,9 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
 renders the matching banner (`stateCopy.ts` holds the wording; times are shown in the browser's
 timezone). Anything that is not a `GitHubError` (bad configuration, a bug) is rethrown to
 `error.tsx`, which shows a generic message with no details. Error messages never include the
-token.
+token. The browser gets only the kind, the reset time and a fixed message per kind
+(`toDashboardError` in `dashboard.ts`); GitHub's own text, which can name a private repo, stays in
+the server log.
 
 Every request in `client.ts` has a 30 second timeout. A request that throws (reset, timeout) or
 gets a 502, 503 or 504 is retried once after a second; token errors, rate limits and other
@@ -328,6 +336,8 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 ```
 .
 ├── CLAUDE.md
+├── .coderabbit.yaml           # lets CodeRabbit review PRs that target v2
+├── next.config.ts             # security headers, no X-Powered-By (section 15)
 ├── docs/
 │   ├── PRD.md  DESIGN.md  ARCHITECTURE.md  TASKS.md
 │   └── design/screens/*.png
@@ -335,7 +345,7 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 │   ├── spike.mjs
 │   └── RESULTS.md
 ├── public/
-│   ├── icon.svg  logo-ink.svg  logo-white.svg
+│   ├── icon.svg  logo-ink.svg  logo-white.svg  robots.txt
 └── src/
     ├── proxy.ts               # access gate, first layer (section 14)
     ├── app/
@@ -493,3 +503,18 @@ rate limit).
 - *End all sessions:* set a new `AUTH_COOKIE_SECRET` and redeploy; every pass stops working.
 - *Key exposed:* do both.
 - *Local development:* the same three values in `.env.local`, with a separate dev key.
+
+## 15. Public surface (added in the 3.5 audit)
+
+- `next.config.ts` sets `poweredByHeader: false` and, on every response: `X-Frame-Options: DENY`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a
+  `Permissions-Policy` that turns off camera, microphone, geolocation, payment and USB, HSTS, and a
+  partial CSP (`frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'`).
+  The CSP sets no `script-src`: the inline theme script would need a per-request nonce, which forces
+  dynamic rendering and defeats `cacheComponents` (an accepted risk).
+- `public/robots.txt` disallows everything and the root metadata sets `noindex, nofollow`. The gate
+  already lets `/robots.txt` through.
+- `/dev/components` and `/dev/live-check` return 404 in production; `live-check` also calls
+  `requireSession()`.
+- `client.ts` only sends the token to `https://api.github.com`: a full URL from a caller or a
+  `Link: rel="next"` header on another host is refused.
