@@ -50,7 +50,7 @@ me to do them.
 - [x] Caching: 15 min, tag `github` (check the installed Next.js caching API in the docs)
 - [x] `import "server-only"` in every file in `lib/github`
 - **Done when:** tests pass on fixtures and the build passes. Claude Code never runs live mode.
-- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.5 and returns 404 in production.)
+- [x] **(me)** Run `GITHUB_DATA=live pnpm dev` in my own terminal, load the page, and confirm the year total is within 4% of my profile and a few IST days match. (Checked 19 Oct on a temporary `/dev/live-check` page: PR counts, commits and the cache matched; the page stays until 3.6 and returns 404 in production.)
 
 ### 1.5 All-branch commits · `feat/all-branches`
 Added 19 Oct: most work lives on feature branches, so counting the default branch only
@@ -122,38 +122,63 @@ Added 29 Oct: live mode failed with "Could not reach GitHub" after I was added t
 - [x] **(me)** Live check: the page loads with the many-branch repo (uncached load 41.6 s)
 - **Done when:** live mode loads without errors and the many-branch repo is counted on every active branch.
 
-### 3.4 Pre-deploy audit · `chore/audit`
-Whole-app audit before `v2` goes to `main`, all on one branch. Scaled to a single-user
-dashboard that will sit on a public domain with no auth, a write-capable token and work
-repo names. Findings are fixed in this branch or logged in the Parking lot with a reason. Claude Code runs everything on
-fixtures; **(me)** lines need live data or my accounts.
-- [ ] **Secrets and token:** no `NEXT_PUBLIC_` secret; `server-only` in every `lib/github` file; GitHub calls only from server code; token string absent from the `.next/static` client bundle after a build; `.env*` ignored and never in git history; **(me)** swap the classic token for a fine-grained read-only one if it can still see the work org
-- [ ] **Company boundary:** search code, fixtures, tests, docs, `spike/`, `dev-test/` screenshots and git history for real work repo names, PR titles and commit messages; **(me)** supply the search terms from a file outside the repo
-- [ ] **Exposure if the link leaks:** list exactly what an anonymous visitor can see or trigger (repo names, PR titles, work repos, profile data, Refresh, the raw activity payload in the page HTML or RSC data, any API route or server action); confirm private-repo and work-org data reaches the browser only as far as the UI needs; test with `curl` against a production build with no cookies; **(me)** decide with WhatBuilds in mind whether work repo names and PR titles may appear on a public URL at all, or whether `Work` items should be hidden/obscured until auth exists
-- [ ] **Public surface:** `pnpm build && pnpm start`, then `/dev/components` and `/dev/live-check` return 404; security headers (frame, referrer, content-type) and `noindex` set; error and state pages show no stack, token or raw API text; the Refresh server action cannot be abused to burn the rate limit (add a cooldown or document why not)
-- [ ] **Dependencies:** `pnpm audit` (prod deps must be clean; the known dev-only `braces` advisory is recorded), unused deps, lockfile consistent, `engines`/`packageManager` match Vercel
-- [ ] **Metrics are solid:** every definition in PRD §Metric definitions maps to a pure function and a test (active day, both streaks, this week vs last, range total, per-project share, PR opened/open/merged); add any missing case (empty range, streak ending yesterday vs broken today, Monday week boundary, 01:00 IST commit in UTC vs IST, superseded commits, feature-branch-only commits, fork and duplicate sha); check that stat cards, heatmap, project list and range total always agree for every range, repo scope and timezone; metrics have no `Date.now()` and no React or `lib/github` imports; **(me)** repeat the 30-random-day and streak check on the final build, in step 3.5
-- [ ] **Resilience and cost:** each fixture state (empty, `rate_limit`, `token_error`, network) renders correctly; live fetch fails loudly rather than undercounting (the one logged exception is a repo cut at 5,000 branches); uncached load time and GitHub rate-limit use measured via `/dev/live-check` **(me)**; cache is 15 min and Refresh invalidates only the `github` tag
-- [ ] **Code health:** `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` clean; no `console.log`, dead code or stray TODOs (the `[github]` server logs in `client.ts` and `index.ts` are deliberate); `coderabbit-review` over the full `main...v2` diff, plus `/security-review` as a second pass
-- [ ] **Design-system conformance:** repo-wide search for raw hex, `shadow`, blur, gradients and off-scale spacing outside `tokens.css`; mono used for numbers only; quick re-check that 3.3 left every screen and state matching its PNG in both themes at 390 and 1280 px
-- [ ] **Repo and docs hygiene:** README describes v2, not the old Vite app; no leftover Vite files, `package-lock.json` or temp files in the `v2` → `main` diff; PRD, ARCHITECTURE and TASKS match what was built; `.coderabbit.yaml` decision from the Parking lot
-- [ ] **Deploy readiness:** env var names in ARCHITECTURE §4 match what the code reads; `GITHUB_DATA` cannot reach `live` by accident (preview vs production); **(me)** a Vercel preview with live env loads once before the merge
-- [ ] **Auth verdict:** from the exposure findings, recommend in `docs/AUDIT.md` whether authentication must come immediately after the MVP or can wait, with the cheapest stopgap if needed (for example Vercel deployment protection or a shared-secret gate); update the PRD risk row and "After the MVP" order to match
-- [ ] Write the results (what was checked, what was found, what was fixed or accepted) into `docs/AUDIT.md`
-- **Done when:** every box above is ticked or has an accepted-risk note in `docs/AUDIT.md`, the auth verdict is recorded, and nothing found is rated high.
+### 3.4 Access key gate · `feat/access-gate`
+Added 29 Oct. A single-user gate so the public URL shows nothing without my key: a visible username (my GitHub username, checked against `GITHUB_USERNAME`; public, so it adds no security and is there for the UX and for Apple Passwords autofill) plus a 20+ character random access key kept in Apple Passwords. No auth library, no JWT, no database. Same behaviour in development and production; it fails closed. Design: DESIGN.md §6.12, §6.13, §7.4 and the `unlock-*` screens; mechanics: ARCHITECTURE.md "Access gate".
+- [x] `src/proxy.ts` (Node runtime; the app lives under `src/`) runs on every request except `_next/static` and `_next/image`. Without a valid session, page and data reads redirect to `/unlock` and everything else (server actions, API calls) gets a bare 401 with no body; only `/unlock` and a few public files (icon, favicon, `robots.txt`, the two logos) pass. Rules live in the pure, tested `decideAccess`
+- [x] Route groups so the unlock page never renders the header or the avatar (the root layout used to fetch the profile on every route): the root layout keeps html, fonts, theme script and skip link; `(app)/` holds the header, Dashboard, Profile, the error page and `dev/`; `(gate)/unlock/` is logo only
+- [x] `AUTH_KEY_HASH` (SHA-256 hex of the key) and `AUTH_COOKIE_SECRET` (32+ characters), read by `src/lib/auth/gate.ts` with `GITHUB_USERNAME`. A missing or malformed value makes the gate unavailable: every route shows "GitTrack is unavailable", no variable names on the page, the real reason in the server log only, no values
+- [x] Unlock server action: username (exact match with `GITHUB_USERNAME`, capitals count) and key hash compared in constant time, both always computed; a wrong login waits ~1 s and gets one generic message; success sets `gt_session` (`v1.<expiry>.<HMAC-SHA256>`, httpOnly, Secure in production, SameSite=Strict, Path=/, 30 days)
+- [x] Lock button in the header (DESIGN.md §6.12): deletes the cookie, then replaces the page with `/unlock` in a full load; a restored back/forward-cache page reloads at once (`BackForwardGuard`); every gated response is `Cache-Control: no-store`
+- [x] Three layers: the proxy; `requireSession()` at the top of every server action (except `lock` and `unlock`) and in `getDashboardData` and `getProfileData`, so the data layer refuses on its own even if the proxy is skipped
+- [x] Refresh needs a session and has a 60 s cooldown (in memory per instance, best effort); inside it the action quietly does nothing and the data on screen stays
+- [x] Tests: cookie (valid, tampered, expired, other secret, malformed), credentials (right, wrong key, wrong username, wrong case, empty, oversize), gate config, `decideAccess` (allow-list, redirect vs 401, unavailable), `requireSession`, unlock action, Refresh cooldown and Lock
+- [x] Playwright on fixtures (own server on port 3100, test-only values passed inline): locked → redirect → wrong login → unlock → dashboard with Lock → Lock → Back stays on `/unlock`; unavailable screen with a variable unset; screenshots compared with the PNGs (Unlock desktop light, wrong login light, Unlock mobile dark, unavailable light, the dashboard header on desktop light and mobile dark; the other theme and width combinations are the same components in the other theme); development mode (`pnpm dev`) run on a throwaway copy of the project: cookie not Secure, Lock, no header on `/unlock`; `curl` with no cookie, forged, expired and other-secret cookies
+- [x] ARCHITECTURE.md §4 env rows, §10, §11 and a new "Access gate" section with the key rotation runbook
+- [ ] **(me)** Add the two placeholder lines to `.env.example` (Claude cannot edit `.env*`); make a separate dev key, hash and secret for `.env.local` (`docs/temp/key-gate-guide.md`, Part B) and unlock once locally; restart a dev server that was already running when this branch arrived (its hot reload showed the old header on the unavailable screen until restarted)
+- [ ] **(me)** Create the real key in Apple Passwords (website = the deployed URL, username = my GitHub username), make `AUTH_KEY_HASH` and `AUTH_COOKIE_SECRET` (`docs/temp/key-gate-guide.md`, Part A), and add both in Vercel for **Production and Preview** with the Secret type (write-only after saving); `GITHUB_TOKEN` stays Production only; redeploy
+- [ ] **(me)** After this PR merges into `v2`, open the `v2` Preview deployment and prove the gate on a real deployment: locked redirect, unlock, Lock, wrong login
+- **Done when:** with no cookie, `curl` to `/`, `/profile`, an RSC request and the Refresh action returns a redirect or 401 and no activity data; the `/unlock` HTML contains no repo names, avatar or profile data; lint, test and build pass; the gate is proved on the Preview.
 
-### 3.5 Deploy · merge `v2` → `main`
-- [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which turn off Vercel deploys while `main` still holds the old Vite app
-- [ ] **(me)** Vercel env vars: `GITHUB_TOKEN`, `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live`; framework preset Next.js
+### 3.5 Pre-deploy audit · `chore/audit`
+Whole-app audit before `v2` goes to `main`, all on one branch. Scaled to a single-user dashboard on a public domain behind the access key gate (3.4), with a write-capable classic token and work repo names. Findings are fixed in this branch or logged in the Parking lot with a reason. Claude Code runs everything on fixtures; **(me)** lines need live data or my accounts. Results go into `docs/AUDIT.md`.
+
+Severity, for `docs/AUDIT.md`: **High** = the token or work data is exposed, or the numbers are wrong. **Medium** = a hardening gap. **Low** = cleanup.
+
+**Must pass to deploy**
+- [ ] **Secrets and token:** no `NEXT_PUBLIC_` secret; `server-only` in every `lib/github` and `lib/auth` file; GitHub calls only from server code; the token and the `AUTH_*` values absent from the `.next/static` client bundle, the server logs and the error pages; `.env*` ignored and never in git history. **(me)** Classic token kept by decision, recorded as an accepted risk in `docs/AUDIT.md`, with guardrails: dedicated to GitTrack, scopes exactly `repo`, `read:org` and `read:user`, an expiry date with a rotation reminder, stored only locally and in Vercel Production marked Sensitive, revoked at once if leaked
+- [ ] **Company boundary:** search code, fixtures, tests, docs, `spike/`, `dev-test/` screenshots and git history for real work repo names, PR titles and commit messages; **(me)** supply the search terms from a file outside the repo
+- [ ] **Exposure, verifying the gate:** on a production build with no cookie, `curl` the pages, an RSC request (with the `RSC: 1` header), the Refresh action (`Next-Action` header) and `/unlock`, and confirm no data comes back (3.4 did this on fixtures; repeat on the final build). Then, for an unlocked session, trim what `DashboardView` receives to the fields the UI uses (for example drop `sha`, `crossCheck` and `supersededCommits` unless something reads them) and record what remains (repo names, PR titles and links); **(me)** decide with WhatBuilds in mind whether work repo names and PR titles may appear behind the key at all
+- [ ] **Public surface:** `pnpm build && pnpm start` with the `AUTH_*` values passed inline; `/dev/components` and `/dev/live-check` return 404 (or delete `live-check`, see 3.6); security headers (frame, referrer, content-type, permissions) in `next.config.ts`, which has none today; `poweredByHeader: false`; a `robots.txt` that disallows everything, alongside `noindex`; error and state pages show no stack, token or raw API text; verify the Refresh cooldown
+- [ ] **Deploy readiness:** env var names in ARCHITECTURE §4 match what the code reads; `GITHUB_DATA=live` set for Production only; `GITHUB_TOKEN` not set for Preview; `AUTH_KEY_HASH` and `AUTH_COOKIE_SECRET` set for Production and Preview; revisit the `vercel.json` entries (`v2: true`, `feat/*` and `chore/*` false). **(me)** The first live check runs on production behind the gate, right after the merge (3.6)
+- [ ] **Access gate verification:** a wrong, empty, tampered and expired cookie is refused; the cookie flags are right in the browser; the failure delay is there; a production build with the variables unset shows the unavailable screen and answers 503 to non-page requests; Lock clears the cookie and Back does not show the dashboard
+- [ ] **Vercel logs and env:** server-side error logs never include the token or raw GitHub responses; `GITHUB_TOKEN`, `AUTH_KEY_HASH` and `AUTH_COOKIE_SECRET` are set for Production only (the two `AUTH_*` values also for Preview, see above) and use the Secret type
+- [ ] **(me)** Branch protection: a GitHub ruleset on `main` and `v2` that blocks force pushes and branch deletion, before the `v2` → `main` merge
+
+**Verify and log**
+- [ ] **Dependencies:** `pnpm audit` (prod deps must be clean; the known dev-only `braces` advisory is recorded), unused deps, lockfile consistent, `engines`/`packageManager` match Vercel
+- [ ] **Metrics are solid:** every definition in PRD §Metric definitions maps to a pure function and a test (active day, both streaks, this week vs last, range total, per-project share, PR opened/open/merged); add any missing case (empty range, streak ending yesterday vs broken today, Monday week boundary, 01:00 IST commit in UTC vs IST); check that stat cards, heatmap, project list and range total always agree for every range, repo scope and timezone; metrics have no `Date.now()` and no React or `lib/github` imports; **(me)** repeat the 30-random-day and streak check on the final build, in step 3.6
+- [ ] **Data layer:** superseded commits, feature-branch-only commits, fork and duplicate sha are tested in `lib/github/normalize`, not in metrics; the branch scan, retry, timeout and log masking added in 3.3a keep their tests
+- [ ] **Resilience and cost:** each fixture state (empty, `rate_limit`, `token_error`, network) renders correctly; live fetch fails loudly rather than undercounting (the one logged exception is a repo cut at 5,000 branches); uncached load time and GitHub rate-limit use measured via `/dev/live-check` **(me)** (41.6 s uncached with the many-branch repo on 29 Oct); cache is 15 min and Refresh invalidates only the `github` tag
+- [ ] **Code health:** `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` clean; no `console.log`, dead code or stray TODOs (the `[github]` and `[gate]` server logs are deliberate); `coderabbit-review` over the full `main...v2` diff, plus `/security-review` as a second pass
+- [ ] **Design-system conformance:** repo-wide search for raw hex, `shadow`, blur, gradients and off-scale spacing outside `tokens.css`; mono used for numbers only; quick re-check that every screen and state, including Unlock, matches its PNG in both themes at 390 and 1280 px
+- [ ] **Repo and docs hygiene:** README describes v2, not the old Vite app; no leftover Vite files, `package-lock.json` or temp files in the `v2` → `main` diff; PRD, ARCHITECTURE and TASKS match what was built; `.coderabbit.yaml` decision from the Parking lot; the header comment in `src/app/(app)/dev/live-check/page.tsx` points at the right task
+- [ ] **Access gate verdict:** confirm 3.4 closes the exposure findings, and record in `docs/AUDIT.md` that full authentication is needed only if the app goes multi-user or public
+- [ ] Write the results (what was checked, what was found, what was fixed or accepted) into `docs/AUDIT.md`
+- **Done when:** every box above is ticked or has an accepted-risk note in `docs/AUDIT.md`, the access gate verdict is recorded, and nothing found is rated high.
+
+### 3.6 Deploy · merge `v2` → `main`
+- [ ] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which control Vercel deploys while `main` still holds the old Vite app
+- [ ] **(me)** Vercel env vars: `GITHUB_TOKEN` (Production only), `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live` (Production only), `AUTH_KEY_HASH` and `AUTH_COOKIE_SECRET` (Production and Preview, type Secret); framework preset Next.js
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
 - [ ] **(me)** Production build log shows pnpm install (pnpm 12.x), Install Command empty, Node 24.x
-- [ ] **(me)** Launch checklist (Rebuild Guide step 8): 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
-- [ ] **(me)** Keep the URL unshared until auth (PRD risk, accepted 12 Oct)
-- [ ] Remove `src/app/dev/live-check` (temporary live-data cross-check page; it returns 404 in production, so it can stay while the core features are built)
+- [ ] **(me)** Launch checklist (Rebuild Guide step 8): unlock works on production; 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
+- [ ] **(me)** Share the URL only after the gate is verified (3.4, 3.5)
+- [ ] Remove `src/app/(app)/dev/live-check` (temporary live-data cross-check page; it returns 404 in production, so it can stay while the core features are built)
 
 ## After the MVP
 
-Not broken into tasks yet; see the PRD roadmap. In order: auth → MCP read
+Not broken into tasks yet; see the PRD roadmap. In order: full authentication (only if the app
+goes multi-user or public; the access key gate in 3.4 covers single-user use) → MCP read
 tools → `/git-track` session logging + database → branch tracking and goals.
 
 ## Parking lot
@@ -163,4 +188,7 @@ Ideas that come up during the build go here instead of into the current task.
 - [ ] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default)
 - [ ] Replace vite-tsconfig-paths with resolve.tsconfigPaths: true in vitest.config.mts (removes the plugin and the deprecated tsconfck warning)
 - [ ] Upgrade ESLint 9 → 10 once eslint-config-next supports it
+- [ ] repo-watch alerts for GitTrack: decision pending (see MacBook checklist)
+- [ ] Product video with Remotion: after deploy, separate repo gittrack-video, fixture data only
+- [ ] Change the access key from the site itself (after the MVP is deployed): a signed-in "Change key" screen that asks for the current key, takes a new one and applies it, replacing the manual steps of making a hash, editing `AUTH_KEY_HASH` in Vercel and redeploying; optionally also rotate the cookie secret to sign every device out. The current design is env-only and has no write path, so this needs one of: a small store for the hash and a session version (for example Vercel Edge Config or KV, which departs from "no database"), or the Vercel REST API with a token to update the variables and trigger a redeploy (a new high-value secret). Decide that first; keep the env values as the fallback so the gate still fails closed
 - [ ] braces advisory GHSA-vfj7-8cjw-p6xm (dev-only, via eslint-config-next): run pnpm audit --fix once a patched version ships

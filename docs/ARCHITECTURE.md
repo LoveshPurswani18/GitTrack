@@ -58,7 +58,8 @@ boundary").
 `.env.local` stays on `fixtures` permanently. To see live data, I run
 `GITHUB_DATA=live pnpm dev` in my own terminal. A variable set in the shell
 wins over `.env.local`, so nothing in the file changes and nothing needs
-switching back.
+switching back. The access gate's three values (section 4) also live in `.env.local`; the gate
+applies in every data mode.
 
 ## 4. Environment variables
 
@@ -68,9 +69,14 @@ switching back.
 | `GITHUB_USERNAME` | `LoveshPurswani18` | Author filter and profile lookup |
 | `WORK_ORG` | (set in env only) | Repos owned by this org get `isWork: true`. Never hard-code its value. |
 | `GITHUB_DATA` | `fixtures` | `fixtures` or `live` |
+| `AUTH_KEY_HASH` | 64 hex characters | Access gate: the SHA-256 of the access key, lowercase hex. Server only; type Secret in Vercel (write-only after saving). |
+| `AUTH_COOKIE_SECRET` | 32+ random characters | Access gate: signs the session cookie (`openssl rand -base64 32`). Server only; type Secret in Vercel (write-only after saving). |
 
-`src/lib/config.ts` reads and validates these once, server side. In fixtures
-mode, `GITHUB_TOKEN` is optional.
+`src/lib/config.ts` reads and validates the GitHub values once, server side. In fixtures
+mode, `GITHUB_TOKEN` is optional. The access gate reads `AUTH_KEY_HASH`, `AUTH_COOKIE_SECRET`
+and `GITHUB_USERNAME` itself (`src/lib/auth/gate.ts`) and never throws: a missing or malformed
+value makes the gate unavailable (section 14). The gate applies in every mode, so `.env.local`
+needs these three values to run `pnpm dev`. `.env.example` lists the names with placeholders.
 
 ## 5. Data model (`src/types/activity.ts`)
 
@@ -286,10 +292,13 @@ last week in UTC), and a closed-unmerged PR.
 ## 10. Page and component flow
 
 ```
-app/layout.tsx         fonts, theme script (data-theme before paint), <AppHeader>
-app/page.tsx           server: getDashboardData() → <DashboardView result={…} />; title row with <UpdatedAgo>
-app/loading.tsx        skeleton dashboard (DESIGN.md §6.10)
-app/profile/page.tsx   server: getProfileData() → <ProfileView> (card + caption, or a banner)
+proxy.ts               the access gate's first layer, before every route (section 14)
+app/layout.tsx         fonts, theme script (data-theme before paint), skip link; no header
+app/(app)/layout.tsx   signed-in pages: <AppHeader> with the Lock button, <BackForwardGuard>
+app/(app)/page.tsx     server: getDashboardData() → <DashboardView result={…} />; title row with <UpdatedAgo>; the skeleton (DESIGN.md §6.10) is its Suspense fallback
+app/(app)/profile/page.tsx   server: getProfileData() → <ProfileView> (card + caption, or a banner)
+app/(app)/error.tsx    fallback for non-GitHub failures (keeps the header and Lock)
+app/(gate)/unlock/     the only page without a session: logo, <UnlockForm> or "GitTrack is unavailable"
 components/layout/HeaderAvatar.tsx   server: the profile avatar for <AppHeader>, neutral circle on failure
 components/dashboard/DashboardView.tsx   "use client": ok / stale / error → dashboard, banner + dashboard, or banner + no-data card
 components/dashboard/Dashboard.tsx   "use client": holds range, scope, tz; runs metrics in useMemo
@@ -328,22 +337,24 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 ├── public/
 │   ├── icon.svg  logo-ink.svg  logo-white.svg
 └── src/
+    ├── proxy.ts               # access gate, first layer (section 14)
     ├── app/
-    │   ├── layout.tsx
+    │   ├── layout.tsx         # fonts, theme script, skip link
     │   ├── globals.css        # tokens + @theme inline (DESIGN.md §3.6)
-    │   ├── page.tsx
-    │   ├── error.tsx          # fallback for non-GitHub failures
-    │   ├── actions.ts         # refresh server action
-    │   └── profile/
-    │       └── page.tsx
+    │   ├── actions.ts         # server actions: refreshData (session + 60 s cooldown), lock
+    │   ├── (app)/             # signed-in pages, with the header
+    │   │   ├── layout.tsx  page.tsx  error.tsx
+    │   │   ├── profile/page.tsx
+    │   │   └── dev/           # dev-only pages, 404 in production
+    │   └── (gate)/unlock/     # page.tsx, UnlockForm.tsx, actions.ts (unlock)
     ├── components/
     │   ├── ui/                # DESIGN.md §6 primitives, no data logic
     │   │   ├── Button.tsx  SegmentedControl.tsx  TimezoneSelect.tsx
     │   │   ├── StatCard.tsx  Heatmap.tsx  ProjectList.tsx  PRBadge.tsx
-    │   │   └── WorkTag.tsx  Banner.tsx  Skeleton.tsx  ProfileCard.tsx  Avatar.tsx
+    │   │   └── WorkTag.tsx  Banner.tsx  Skeleton.tsx  ProfileCard.tsx  Avatar.tsx  TextInput.tsx
     │   ├── layout/
     │   │   ├── AppHeader.tsx  HeaderAvatar.tsx
-    │   │   └── ThemeToggle.tsx
+    │   │   └── ThemeToggle.tsx  LockButton.tsx  BackForwardGuard.tsx
     │   ├── profile/
     │   │   └── ProfileView.tsx
     │   └── dashboard/         # composes ui/ with metrics
@@ -353,6 +364,14 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     │       └── States.tsx  stateCopy.ts
     ├── lib/
     │   ├── config.ts          # env parsing, server only
+    │   ├── refreshCooldown.ts # canRefresh: the 60 s Refresh cooldown (pure)
+    │   ├── auth/              # access gate, server only
+    │   │   ├── gate.ts        # AUTH_* + GITHUB_USERNAME → ready or unavailable
+    │   │   ├── cookie.ts      # sign and verify the gt_session pass
+    │   │   ├── credentials.ts # username + key check
+    │   │   ├── access.ts      # decideAccess: the proxy's rules (pure)
+    │   │   ├── session.ts     # requireSession, startSession, endSession (next/headers)
+    │   │   └── *.test.ts
     │   ├── github/            # server only
     │   │   ├── index.ts       # getActivity / getProfile, picks fixtures or live, caching
     │   │   ├── dashboard.ts   # getDashboardData: ok / stale (last good data) / error
@@ -396,7 +415,13 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 - `pnpm test` runs Vitest on `lib/metrics` and `lib/github` (normalize, the client with a fake `fetch`, errors, live fetch and the dashboard states).
 - `pnpm lint` and `pnpm build` must pass before any commit proposal.
 - UI: Playwright MCP screenshots at 1280×800 and 390×844, light and dark,
-  compared against `docs/design/screens/` (DESIGN.md §12). Always use fixtures.
+  compared against `docs/design/screens/` (DESIGN.md §12). Always use fixtures. The gate applies:
+  run your own server on another port with throwaway `AUTH_KEY_HASH`, `AUTH_COOKIE_SECRET` and
+  `GITHUB_USERNAME` passed inline (never the real ones, never the user's dev server), unlock,
+  then screenshot.
+- Access gate checks that are not unit tests: `curl` with no cookie, a forged, an expired and an
+  other-secret cookie against a production build (`pnpm build && pnpm start`) must redirect or
+  answer 401 with no data; a server action's id posted to another path must not run it.
 - Live accuracy, which I run myself (PRD success criterion 1), in `Asia/Kolkata`:
   - the default-branch part of our commits (the `onDefault` ones plus
     `supersededCommits`) matches GitHub's own per-day counts on the live-check page, and
@@ -405,3 +430,66 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
     cloned repos, allowing the known rebase gap;
   - squash-merged PRs with deleted branches show their original days;
   - an uncached load stays acceptable (the spike took 5.95 s for the default branch only).
+
+## 14. Access gate
+
+A single-user gate so the public URL shows nothing without my key (task 3.4; the screens are
+DESIGN.md §7.4). No auth library, no JWT, no database.
+
+**Login.** A visible username (my GitHub username, compared with `GITHUB_USERNAME`
+exactly, capitals included, surrounding spaces ignored; it is public, so it adds no security and exists for the layout and for
+Apple Passwords autofill) and the access key (20+ random characters kept in Apple Passwords).
+`AUTH_KEY_HASH` holds the SHA-256 of the key as 64 lowercase hex characters; the key itself is
+never stored. `checkCredentials` hashes the typed key (exactly as typed, no trimming), compares
+the digests in constant time, and always runs both the username and the key comparison. A wrong
+login waits about a second and gets one message, "That username or key didn't work. Try again.",
+whichever part was wrong.
+
+**The pass.** On success the server sets cookie `gt_session` = `v1.<expiry in epoch
+seconds>.<base64url HMAC-SHA256 of "v1.<expiry>" keyed with AUTH_COOKIE_SECRET>`: `httpOnly`
+(no script can read it), `Secure` in production, `SameSite=Strict`, `Path=/`, `Max-Age` 30
+days. It is stateless: nothing is stored server side, and `verifySession` accepts a pass only
+if the signature matches (constant-time compare) and the expiry has not passed.
+
+**Three layers** (each works without the others):
+
+| Layer | Where | What it does |
+| --- | --- | --- |
+| 1. Proxy | `src/proxy.ts`, rules in `decideAccess` | Runs before every route except `_next/static` and `_next/image`. No pass: page and data reads (GET/HEAD) redirect to `/unlock`; any other method (server actions, API calls) gets a bare 401 with no body. Only `/unlock` and `/icon.svg`, `/favicon.ico`, `/robots.txt`, `/logo-ink.svg`, `/logo-white.svg` pass. Every response it handles is `Cache-Control: no-store`. A valid pass on `/unlock` redirects to `/`. |
+| 2. Server actions | `requireSession()` first line of `refreshData` | A server action is a POST to the page it is used on, so a proxy matcher that skips a path skips its actions too. Every action calls `requireSession()` itself, except `unlock` (it starts the session) and `lock` (deleting a missing pass changes nothing). **New actions must call it.** |
+| 3. Data layer | `getDashboardData`, `getProfileData` | Both call `requireSession()` before any data is read, so the data refuses on its own even if the proxy is skipped. |
+
+**Not configured: it fails closed.** If `AUTH_KEY_HASH` (64 hex), `AUTH_COOKIE_SECRET` (32+
+characters) or `GITHUB_USERNAME` is missing or malformed, `parseGate` returns `unavailable`.
+Page reads then get the unlock page showing only "GitTrack is unavailable" (the proxy rewrites
+to it; Next ignores a status set on a rewrite, so that page answers 200), every other request
+gets a real 503, `unlock` always fails, and `requireSession` always redirects. The reason is
+logged once as `[gate] unavailable ...` naming the variable, never a value. This applies in
+development too: there is no gate-off mode, so `.env.local` needs the three values.
+
+**Lock.** `lock` deletes the cookie, then the page is replaced (`location.replace`, a full
+load) with `/unlock`: the signed-in page leaves the history, the browser keeps no copy in
+memory, and a page restored from the back/forward cache reloads at once (`BackForwardGuard`),
+which goes through the proxy again. Other tabs of the same browser keep what they show until
+their next request, which is redirected.
+
+**Refresh.** `refreshData` needs a session and ignores a call within 60 s of the last one
+(`canRefresh`): the data on screen stays, nothing is shown. The timestamp is in server memory,
+so on a serverless host each instance counts for itself (best effort, protecting the GitHub
+rate limit).
+
+**Limits, stated plainly**
+- The pass is not stored server side, so one pass cannot be revoked on its own. Lock removes it
+  from this browser; a copy taken from a device stays valid until it expires. To end every
+  session at once, change `AUTH_COOKIE_SECRET`.
+- The ~1 s failure delay slows guessing but is not a rate limit. The key's strength (20+ random
+  characters) is what protects it.
+- The username is public and is not a second factor.
+- The Refresh cooldown is per instance.
+
+**Rotating (full steps with commands: `docs/temp/key-gate-guide.md`, kept local)**
+- *New key:* make a new key, hash it, set `AUTH_KEY_HASH` in Vercel (Production and Preview),
+  redeploy. New unlocks need the new key; passes already issued stay valid.
+- *End all sessions:* set a new `AUTH_COOKIE_SECRET` and redeploy; every pass stops working.
+- *Key exposed:* do both.
+- *Local development:* the same three values in `.env.local`, with a separate dev key.
