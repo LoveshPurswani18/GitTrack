@@ -35,9 +35,13 @@ const PAD_DAYS = 3;
 const MAX_PR_PAGES = 30;
 /** 100 repositories per page; 2000 repos pushed within a year is far beyond a personal account. */
 const MAX_REPOSITORY_PAGES = 20;
-/** Repos per branch-history request. Each repo asks for up to 50 branches of 100 commits. */
+/** Repos per branch-list request (aliases). Each repo lists up to 100 branches: names and tip dates only. */
 const BRANCH_BATCH = 5;
-const MAX_REF_PAGES = 20;
+const BRANCH_LIST_PAGE_SIZE = 100;
+/** 5,000 branches in one repo; past this the list is cut (and logged) rather than failing the load. */
+const MAX_BRANCH_LIST_PAGES = 50;
+/** Active branches per history request. Each asks for up to 100 of my commits. */
+const HISTORY_BRANCHES_PER_REQUEST = 25;
 
 const REPOSITORY_FIELDS = `nameWithOwner url isFork isPrivate owner { login } defaultBranchRef { name }`;
 // My commits in each PR (author login to drop other people's) and the merge commit, whose parent
@@ -49,7 +53,7 @@ const PR_FIELDS = `number title url state createdAt mergedAt closedAt repository
 // maxRepositories is capped at 100 by GitHub; the spike's account had 17.
 // contributions(first: 100) is not paginated: it only feeds the debug-only crossCheck.
 const ACTIVITY_QUERY = `
-query($login: String!, $from: DateTime!, $to: DateTime!) {
+query Activity($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
     id
     contributionsCollection(from: $from, to: $to) {
@@ -67,7 +71,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
 }`;
 
 const PR_PAGE_QUERY = `
-query($login: String!, $from: DateTime!, $to: DateTime!, $after: String!) {
+query PullRequestPage($login: String!, $from: DateTime!, $to: DateTime!, $after: String!) {
   user(login: $login) {
     contributionsCollection(from: $from, to: $to) {
       pullRequestContributions(first: 100, after: $after) {
@@ -81,7 +85,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!, $after: String!) {
 // Contributions only know the default branch, so repos whose work lives on branches are found
 // from my recent pushes instead (newest first, so paging can stop at the window).
 const REPOSITORIES_QUERY = `
-query($login: String!, $after: String) {
+query Repositories($login: String!, $after: String) {
   user(login: $login) {
     repositories(
       first: 100
@@ -95,29 +99,47 @@ query($login: String!, $after: String) {
   }
 }`;
 
-/** One query for several repos (aliases r0, r1, ...): every branch with only my commits. */
-function branchHistoriesQuery(repoCount: number): string {
+/** Step A, light: for several repos (aliases r0, r1, ...) every branch's name and tip date, no history. */
+function branchListQuery(repoCount: number): string {
   const variables = Array.from({ length: repoCount }, (_, i) => `$o${i}: String!, $n${i}: String!`).join(", ");
   const repos = Array.from(
     { length: repoCount },
-    (_, i) => `r${i}: repository(owner: $o${i}, name: $n${i}) { ...BranchRefs }`,
+    (_, i) => `r${i}: repository(owner: $o${i}, name: $n${i}) { ...BranchTips }`,
   ).join("\n  ");
   return `
-query($since: GitTimestamp!, $userId: ID!, $after: String, ${variables}) {
+query BranchList($after: String, ${variables}) {
   ${repos}
 }
-fragment BranchRefs on Repository {
-  refs(refPrefix: "refs/heads/", first: 50, after: $after) {
+fragment BranchTips on Repository {
+  refs(refPrefix: "refs/heads/", first: ${BRANCH_LIST_PAGE_SIZE}, after: $after) {
     pageInfo { hasNextPage endCursor }
     nodes {
       name
-      target {
-        ... on Commit {
-          history(first: 100, since: $since, author: { id: $userId }) {
-            pageInfo { hasNextPage }
-            nodes { oid authoredDate }
-          }
-        }
+      target { ... on Commit { committedDate } }
+    }
+  }
+}`;
+}
+
+/** Step B: one repo, several named branches (aliases b0, b1, ...), only my commits on each. */
+function branchHistoriesQuery(branchCount: number): string {
+  const variables = Array.from({ length: branchCount }, (_, i) => `$q${i}: String!`).join(", ");
+  const branches = Array.from(
+    { length: branchCount },
+    (_, i) => `b${i}: ref(qualifiedName: $q${i}) { ...BranchHistory }`,
+  ).join("\n    ");
+  return `
+query BranchHistories($o: String!, $n: String!, $since: GitTimestamp!, $userId: ID!, ${variables}) {
+  repository(owner: $o, name: $n) {
+    ${branches}
+  }
+}
+fragment BranchHistory on Ref {
+  target {
+    ... on Commit {
+      history(first: 100, since: $since, author: { id: $userId }) {
+        pageInfo { hasNextPage }
+        nodes { oid authoredDate }
       }
     }
   }
@@ -126,6 +148,7 @@ fragment BranchRefs on Repository {
 
 type UserData<T> = { user: ({ contributionsCollection: T } & { id?: string }) | null };
 type BranchData = Record<string, { refs: RawRefs } | null>;
+type HistoryData = { repository: Record<string, { target: RawBranchHistory["target"] } | null> | null };
 
 export type LiveActivityInput = {
   username: string;
@@ -172,47 +195,95 @@ function splitName(nameWithOwner: string): [string, string] {
   return [nameWithOwner.slice(0, slash), nameWithOwner.slice(slash + 1)];
 }
 
-/** Every branch of each repo with only my commits: one request per BRANCH_BATCH repos. */
+/**
+ * Step A: the branches of each repo whose tip commit is inside the window. A branch whose tip is
+ * older than `since` cannot hold a commit since `since`, so only these need their history read.
+ * GitHub gives no useful order for branches, so every branch is listed, 100 per light request.
+ */
+async function listActiveBranches(
+  client: GitHubClient,
+  repos: RawRepository[],
+  since: string,
+): Promise<Map<string, string[]>> {
+  const active = new Map<string, string[]>();
+  const windowStart = Date.parse(since);
+  const batches: RawRepository[][] = [];
+  for (let i = 0; i < repos.length; i += BRANCH_BATCH) batches.push(repos.slice(i, i + BRANCH_BATCH));
+
+  const keepActive = (nodes: RawBranchHistory[]) =>
+    nodes
+      .filter((node) => node.target?.committedDate && Date.parse(node.target.committedDate) >= windowStart)
+      .map((node) => node.name);
+
+  await client.pool(batches, MAX_PARALLEL_REQUESTS, async (batch) => {
+    const variables: Record<string, unknown> = { after: null };
+    batch.forEach((repo, i) => {
+      [variables[`o${i}`], variables[`n${i}`]] = splitName(repo.nameWithOwner);
+    });
+    const data = await client.graphql<BranchData>(branchListQuery(batch.length), variables);
+
+    for (const [i, repo] of batch.entries()) {
+      const first = data[`r${i}`];
+      if (!first) throw new GitHubError("network", `GitHub repository not found: ${repo.nameWithOwner}`);
+      const names = keepActive(first.refs.nodes);
+      let listed = first.refs.nodes.length;
+      let page = first.refs.pageInfo;
+      // A repo with more than 100 branches: keep listing this repo alone.
+      for (let n = 1; page.hasNextPage; n++) {
+        if (n >= MAX_BRANCH_LIST_PAGES) {
+          client.log(`[github] branch list cut at ${listed} branches of :repo`);
+          break;
+        }
+        const [owner, name] = splitName(repo.nameWithOwner);
+        const next = await client.graphql<BranchData>(branchListQuery(1), {
+          after: page.endCursor,
+          o0: owner,
+          n0: name,
+        });
+        if (!next.r0) throw new GitHubError("network", `GitHub repository not found: ${repo.nameWithOwner}`);
+        names.push(...keepActive(next.r0.refs.nodes));
+        listed += next.r0.refs.nodes.length;
+        page = next.r0.refs.pageInfo;
+      }
+      active.set(repo.nameWithOwner, names);
+    }
+  });
+  return active;
+}
+
+/** Step B: my commits on each active branch, in chunks of HISTORY_BRANCHES_PER_REQUEST per request. */
 async function fetchBranchHistories(
   client: GitHubClient,
   repos: RawRepository[],
   userId: string,
   since: string,
 ): Promise<Map<string, RawBranchHistory[]>> {
-  const result = new Map<string, RawBranchHistory[]>();
-  const batches: RawRepository[][] = [];
-  for (let i = 0; i < repos.length; i += BRANCH_BATCH) batches.push(repos.slice(i, i + BRANCH_BATCH));
+  const active = await listActiveBranches(client, repos, since);
 
-  await client.pool(batches, MAX_PARALLEL_REQUESTS, async (batch) => {
-    const variables: Record<string, unknown> = { since, userId, after: null };
-    batch.forEach((repo, i) => {
-      [variables[`o${i}`], variables[`n${i}`]] = splitName(repo.nameWithOwner);
-    });
-    const data = await client.graphql<BranchData>(branchHistoriesQuery(batch.length), variables);
-
-    for (const [i, repo] of batch.entries()) {
-      const first = data[`r${i}`];
-      if (!first) throw new GitHubError("network", `GitHub repository not found: ${repo.nameWithOwner}`);
-      const branches = [...first.refs.nodes];
-      let page = first.refs.pageInfo;
-      // A repo with more than 50 branches: keep paging this repo alone.
-      for (let n = 0; page.hasNextPage; n++) {
-        if (n >= MAX_REF_PAGES) throw new GitHubError("network", "GitHub returned too many branch pages");
-        const [owner, name] = splitName(repo.nameWithOwner);
-        const next = await client.graphql<BranchData>(branchHistoriesQuery(1), {
-          since,
-          userId,
-          after: page.endCursor,
-          o0: owner,
-          n0: name,
-        });
-        if (!next.r0) throw new GitHubError("network", `GitHub repository not found: ${repo.nameWithOwner}`);
-        branches.push(...next.r0.refs.nodes);
-        page = next.r0.refs.pageInfo;
-      }
-      result.set(repo.nameWithOwner, branches);
+  const chunks: { repo: string; names: string[] }[] = [];
+  for (const [repo, names] of active) {
+    for (let i = 0; i < names.length; i += HISTORY_BRANCHES_PER_REQUEST) {
+      chunks.push({ repo, names: names.slice(i, i + HISTORY_BRANCHES_PER_REQUEST) });
     }
+  }
+
+  const fetched = await client.pool(chunks, MAX_PARALLEL_REQUESTS, async ({ repo, names }) => {
+    const [owner, name] = splitName(repo);
+    const variables: Record<string, unknown> = { o: owner, n: name, since, userId };
+    names.forEach((branch, i) => {
+      variables[`q${i}`] = `refs/heads/${branch}`;
+    });
+    const data = await client.graphql<HistoryData>(branchHistoriesQuery(names.length), variables);
+    if (!data.repository) throw new GitHubError("network", `GitHub repository not found: ${repo}`);
+    // A branch deleted since it was listed comes back null and has nothing to count.
+    return names.flatMap((branch, i): RawBranchHistory[] => {
+      const ref = data.repository![`b${i}`];
+      return ref ? [{ name: branch, target: ref.target }] : [];
+    });
   });
+
+  const result = new Map<string, RawBranchHistory[]>(repos.map((repo) => [repo.nameWithOwner, []]));
+  chunks.forEach(({ repo }, i) => result.get(repo)!.push(...fetched[i]));
   return result;
 }
 

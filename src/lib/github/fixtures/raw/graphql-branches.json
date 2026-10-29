@@ -9,6 +9,7 @@
         {
           "name": "main",
           "target": {
+            "committedDate": "2026-10-13T10:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": true
@@ -29,6 +30,7 @@
         {
           "name": "feat/metrics",
           "target": {
+            "committedDate": "2026-10-13T10:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -53,6 +55,7 @@
         {
           "name": "feat/today",
           "target": {
+            "committedDate": "2026-10-14T04:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -69,6 +72,7 @@
         {
           "name": "feat/stale",
           "target": {
+            "committedDate": "2025-01-15T00:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -98,6 +102,7 @@
         {
           "name": "main",
           "target": {
+            "committedDate": "2026-10-13T05:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -128,6 +133,7 @@
         {
           "name": "develop",
           "target": {
+            "committedDate": "2026-10-11T04:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -171,6 +177,7 @@
         {
           "name": "main",
           "target": {
+            "committedDate": "2026-10-10T00:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -192,6 +199,7 @@
         {
           "name": "main",
           "target": {
+            "committedDate": "2026-10-10T00:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
@@ -203,6 +211,7 @@
         {
           "name": "feat/x",
           "target": {
+            "committedDate": "2026-10-12T06:00:00Z",
             "history": {
               "pageInfo": {
                 "hasNextPage": false
