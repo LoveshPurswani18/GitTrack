@@ -1,0 +1,235 @@
+{
+  "demo-user/gittrack": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": [
+        {
+          "name": "main",
+          "target": {
+            "committedDate": "2026-10-13T10:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": true
+              },
+              "nodes": [
+                {
+                  "oid": "a100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-13T10:00:00Z"
+                },
+                {
+                  "oid": "a200000000000000000000000000000000000002",
+                  "authoredDate": "2026-10-12T20:00:00Z"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "feat/metrics",
+          "target": {
+            "committedDate": "2026-10-13T10:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "oid": "f100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-13T06:00:00Z"
+                },
+                {
+                  "oid": "f200000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-13T08:00:00Z"
+                },
+                {
+                  "oid": "a100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-13T10:00:00Z"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "feat/today",
+          "target": {
+            "committedDate": "2026-10-14T04:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "oid": "d100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-14T04:00:00Z"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "feat/stale",
+          "target": {
+            "committedDate": "2025-01-15T00:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          }
+        },
+        {
+          "name": "odd-ref",
+          "target": {}
+        },
+        {
+          "name": "null-ref",
+          "target": null
+        }
+      ]
+    }
+  },
+  "Work-Org/work-repo-a": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": true,
+        "endCursor": "refs-cursor-1"
+      },
+      "nodes": [
+        {
+          "name": "main",
+          "target": {
+            "committedDate": "2026-10-13T05:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "oid": "b100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-13T05:00:00Z"
+                },
+                {
+                  "oid": "m400000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-03T09:00:00Z"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Work-Org/work-repo-b": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": [
+        {
+          "name": "develop",
+          "target": {
+            "committedDate": "2026-10-11T04:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "oid": "c100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-11T04:00:00Z"
+                },
+                {
+                  "oid": "r300000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-05T04:00:00Z"
+                },
+                {
+                  "oid": "r400000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-06T04:00:00Z"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "demo-user/empty-repo": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": []
+    }
+  },
+  "Work-Org/work-repo-c": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": [
+        {
+          "name": "main",
+          "target": {
+            "committedDate": "2026-10-10T00:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          }
+        }
+      ]
+    }
+  },
+  "demo-user/branch-only": {
+    "refs": {
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": null
+      },
+      "nodes": [
+        {
+          "name": "main",
+          "target": {
+            "committedDate": "2026-10-10T00:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": []
+            }
+          }
+        },
+        {
+          "name": "feat/x",
+          "target": {
+            "committedDate": "2026-10-12T06:00:00Z",
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false
+              },
+              "nodes": [
+                {
+                  "oid": "e100000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-12T05:00:00Z"
+                },
+                {
+                  "oid": "e200000000000000000000000000000000000001",
+                  "authoredDate": "2026-10-12T06:00:00Z"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

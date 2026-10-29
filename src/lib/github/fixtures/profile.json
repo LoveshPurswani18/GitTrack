@@ -1,0 +1,16 @@
+{
+  "avatarUrl": "https://avatars.githubusercontent.com/u/0",
+  "name": "Demo User",
+  "login": "demo-user",
+  "bio": "Bio from GitHub",
+  "location": "Bengaluru, India",
+  "company": "work-org",
+  "followers": 48,
+  "following": 31,
+  "publicRepos": 27,
+  "createdAt": {
+    "daysAgo": 1500,
+    "time": "10:00+05:30"
+  },
+  "url": "https://github.com/demo-user"
+}

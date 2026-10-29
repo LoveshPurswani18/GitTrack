@@ -1,0 +1,14 @@
+{
+  "username": "demo-user",
+  "repos": [
+    {"nameWithOwner": "demo-user/gittrack", "url": "https://github.com/demo-user/gittrack", "isPrivate": false, "isWork": false, "defaultBranch": "main"},
+    {"nameWithOwner": "demo-user/dotfiles", "url": "https://github.com/demo-user/dotfiles", "isPrivate": true, "isWork": false, "defaultBranch": "main"},
+    {"nameWithOwner": "demo-user/notes-app", "url": "https://github.com/demo-user/notes-app", "isPrivate": false, "isWork": false, "defaultBranch": "main"},
+    {"nameWithOwner": "work-org/work-repo-a", "url": "https://github.com/work-org/work-repo-a", "isPrivate": true, "isWork": true, "defaultBranch": "main"},
+    {"nameWithOwner": "work-org/work-repo-b", "url": "https://github.com/work-org/work-repo-b", "isPrivate": true, "isWork": true, "defaultBranch": "develop"}
+  ],
+  "commits": [],
+  "pullRequests": [],
+  "restrictedCount": 0,
+  "crossCheck": []
+}

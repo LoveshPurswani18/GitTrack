@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "a300000000000000000000000000000000000003",
+    "commit": {
+      "author": {
+        "date": "2026-10-10T19:30:00Z"
+      },
+      "committer": {
+        "date": "2026-10-10T19:30:00Z"
+      },
+      "message": "Late night fix at 01:00 IST"
+    }
+  },
+  {
+    "sha": "t100000000000000000000000000000000000001",
+    "commit": {
+      "author": {
+        "date": "2026-10-08T05:00:00Z"
+      },
+      "committer": {
+        "date": "2026-10-08T05:00:00Z"
+      },
+      "message": "Add the loader"
+    }
+  },
+  {
+    "sha": "mt00000000000000000000000000000000000001",
+    "commit": {
+      "author": {
+        "date": "2026-10-08T07:00:00Z"
+      },
+      "committer": {
+        "date": "2026-10-08T07:00:00Z"
+      },
+      "message": "Merge pull request #5 from demo-user/feat/fixtures"
+    }
+  }
+]
