@@ -46,6 +46,31 @@ describe("restPages", () => {
     expect(fake.requests).toHaveLength(2);
   });
 
+  it("does not send the token to a Link next URL on another host", async () => {
+    const { client, fake } = clientFor(() =>
+      jsonResponse([{ n: 1 }], { headers: { link: '<https://evil.example/steal?page=2>; rel="next"' } }),
+    );
+    await expect(client.restPages("/repos/o/r/commits")).rejects.toMatchObject({ kind: "network" });
+    expect(fake.requests).toHaveLength(1);
+    expect(fake.requests.every((r) => r.url.startsWith("https://api.github.com/"))).toBe(true);
+  });
+
+  it("refuses a relative-looking next link that would glue onto the API host", async () => {
+    for (const next of [".evil.example/steal", "@evil.example/steal", ":8443/steal"]) {
+      const { client, fake } = clientFor(() =>
+        jsonResponse([{ n: 1 }], { headers: { link: `<${next}>; rel="next"` } }),
+      );
+      await expect(client.restPages("/repos/o/r/commits")).rejects.toMatchObject({ kind: "network" });
+      expect(fake.requests).toHaveLength(1);
+    }
+  });
+
+  it("refuses a caller-supplied full URL on another host", async () => {
+    const { client, fake } = clientFor(() => jsonResponse([]));
+    await expect(client.restPages("https://evil.example/x")).rejects.toMatchObject({ kind: "network" });
+    expect(fake.requests).toHaveLength(0);
+  });
+
   it("treats a 409 (empty repository) as no commits", async () => {
     const { client } = clientFor(() => jsonResponse({ message: "Git Repository is empty." }, { status: 409 }));
     expect(await client.restPages("/repos/o/r/commits")).toEqual([]);
