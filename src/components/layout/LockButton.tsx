@@ -17,10 +17,14 @@ export function LockButton() {
     setPending(true);
     try {
       await lock();
-    } finally {
-      // replace(), not push: the signed-in page leaves the history, so Back cannot return to it.
-      window.location.replace(`${window.location.origin}/unlock`);
+    } catch {
+      // The pass was not deleted, so do not show the unlock screen as if it were: stay and let
+      // the user try again.
+      setPending(false);
+      return;
     }
+    // replace(), not push: the signed-in page leaves the history, so Back cannot return to it.
+    window.location.replace(`${window.location.origin}/unlock`);
   }
 
   return (
