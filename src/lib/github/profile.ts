@@ -1,5 +1,6 @@
 import "server-only";
 
+import { requireSession } from "@/lib/auth/session";
 import type { Profile, ProfileResult } from "@/types/profile";
 import { GitHubError, serializeError } from "./errors";
 import { getProfile } from "./index";
@@ -18,6 +19,7 @@ export async function resolveProfile(load: () => Promise<Profile>): Promise<Prof
   }
 }
 
-export function getProfileData(): Promise<ProfileResult> {
+export async function getProfileData(): Promise<ProfileResult> {
+  await requireSession(); // the data layer checks the pass itself, whatever the proxy did
   return resolveProfile(getProfile);
 }
