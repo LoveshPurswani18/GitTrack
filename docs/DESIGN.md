@@ -243,8 +243,16 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 ### 6.12 App header
 - 56px tall, 1px bottom `border`, `bg` fill, sticky (z 40); inner row max 1024px.
 - Left: logo lockup linking to `/`. Then nav (desktop): Dashboard, Profile as 13px/500 links, 6 × 12px padding, `radius-sm`. Active = `surface-hover` fill + `text-primary` + `aria-current="page"`; inactive = `text-secondary`.
-- Right: theme toggle (secondary icon button, `Moon` in light, `Sun` in dark) and a 28px avatar.
+- Right, in this order: theme toggle (secondary icon button, `Moon` in light, `Sun` in dark) · **Lock** · a 28px avatar.
+- Lock: desktop = secondary button, 32px tall, `Lock` icon (16px, `text-muted`) + label "Lock", `aria-label` "Lock GitTrack". Mobile = 44px ghost icon-only button between the theme toggle and the avatar. It ends the session on this device (the cookie is deleted) and replaces the page with `/unlock` in a full page load, not a soft navigation, so Back cannot return to the signed-in page and the browser keeps no copy of it. Shown on every signed-in screen (Dashboard, Profile and the error page); never on `/unlock`.
 - Mobile: no nav links; the avatar links to Profile; the theme toggle is a 44px ghost icon button.
+
+### 6.13 Text input
+- 44px tall (desktop and mobile), 12px left padding, `radius-sm`, 1px `control-border`, `bg` fill, `text-primary`, 14px `body`.
+- Label above it: 13px/500 `text-primary`, 6px gap, linked with `for`/`id`.
+- Focus: 2px solid `focus-ring` outline, 2px offset (same ring as buttons).
+- Error: border `danger`, no focus ring colour change; message below with `CircleAlert` 16px, 13px `danger`, `role="alert"`; the input gets `aria-invalid="true"` and `aria-describedby` pointing to the message.
+- Password variant: `type="password"`, `autocomplete="current-password"`, a 36×36 ghost icon button inside on the right (`Eye` / `EyeOff`, `text-muted`, `aria-label` "Show key" / "Hide key"); input right padding 44px.
 
 ---
 
@@ -252,7 +260,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 
 ### 7.1 Dashboard (`/`)
 Top to bottom, in a 1024px column with 24px gaps between sections:
-1. Header.
+1. Header (with the Lock button, §6.12).
 2. Title row: "Activity" (`title`) + "Commits and pull requests across personal and work repos." (`body` `text-secondary`); "Updated N min ago" (`caption`) aligned right on desktop, under the title on mobile.
 3. Banner, if any.
 4. Control bar: Range control, Repos control, flexible spacer, TimezoneSelect, Refresh. Wraps on narrow screens. On mobile it stacks: range, repos, then timezone + refresh.
@@ -261,10 +269,19 @@ Top to bottom, in a 1024px column with 24px gaps between sections:
 7. Pull requests card and Commits by project card, side by side (`flex: 1 1 380px` each, 24px gap); stacked on mobile.
 
 ### 7.2 Profile (`/profile`)
-Header → "Profile" title → ProfileCard → caption. Same column and gaps.
+Header (with the Lock button) → "Profile" title → ProfileCard → caption. Same column and gaps.
 
 ### 7.3 Mobile (under 640px)
 Single column, 16px gutters, 16px gaps; the changes listed per component above. The mobile mockups are 390px wide.
+
+### 7.4 Unlock (`/unlock`)
+- No app header or nav. Centred column: logo lockup (28px mark + "GitTrack" 20px/600), 24px gap, then a card.
+- Card: `surface`, 1px `border`, `radius-md`, 32px padding (24px on mobile), max 360px wide, 20px gaps. Top padding of the page 128px desktop, 72px mobile; 16px side gutters.
+- Content: "Unlock GitTrack" (the page's one `h1`, 20px/600) + "This dashboard is private. Sign in with your username and access key." (`text-secondary`); Text input "Username" (`type="text"`, `autocomplete="username"`, `autocapitalize="none"`, `spellcheck="false"`, focused on load); Text input "Access key" (password variant, `autocomplete="current-password"`), 16px between fields; full-width primary button "Unlock" (44px, `LockOpen` icon; Enter submits); caption "Stays unlocked on this device for 30 days." (12px `text-muted`, centred).
+- The username/password pair is what lets Apple Passwords (and other password managers) save and autofill the key. The username is checked against `GITHUB_USERNAME` exactly, capitals included (surrounding spaces are ignored); it is public, so it adds no security on its own. The fields are empty on the public page (the PNGs show them already autofilled) and keep their values after a wrong login so a typo can be fixed.
+- Busy: button disabled, label "Unlocking…".
+- States: Wrong username or key (both inputs in the error style, `aria-invalid="true"`, one message under the key field: "That username or key didn't work. Try again." Never say which one was wrong; the answer takes the same ~1 s either way). Unavailable, when the gate is not configured (danger banner "GitTrack is unavailable" / "This site isn't available right now. Try again later."; no form). Never name env vars, settings or causes on this page; the real reason is logged server-side only, without values.
+- The page renders no activity data, repo names or user details.
 
 ---
 
@@ -279,6 +296,10 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 | Token error, no cache | Danger banner + a centred card: "No data to show" / explanation / secondary "Try again" button |
 | Token error with cache | Danger banner + cached data |
 | Profile fetch failed | Danger banner on the profile page; the card is not shown |
+| No session (first visit, after Lock, pass expired or invalid) | Every route goes to the Unlock screen (§7.4); nothing else is shown |
+| Wrong username or key | Unlock screen with both inputs in the error style and one message (§7.4) |
+| Gate not configured | Unlock screen with the "GitTrack is unavailable" banner and no form (§7.4) |
+| Unexpected error (`error.tsx`) | Danger banner and "Try again"; the header, with the Lock button, stays |
 
 ## 9. Interaction and motion
 
@@ -296,6 +317,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 - Status is never colour-only: PR status has words, work items have the Work tag, banners have icons and titles.
 - The heatmap has an `aria-label`, and each cell has an accessible name like "6 commits on Tue, 14 Oct".
 - Mobile touch targets ≥44px.
+- The Unlock form: each input has a visible label, the error is announced (`role="alert"`) and linked with `aria-describedby`, the show/hide key button has a name and `aria-pressed`, and the page has exactly one `h1`.
 
 ## 11. Do and don't
 
@@ -316,7 +338,7 @@ Single column, 16px gutters, 16px gaps; the changes listed per component above. 
 3. Tab through the page: every control is reachable and shows the focus ring.
 4. Search the diff for hex colours, `shadow`, `blur` and off-scale spacing; there should be none outside `tokens.css`.
 
-With the Playwright MCP, ask Claude Code to screenshot the page at 1280×800 and 390×844 in both themes and compare them against the PNGs. Claude Code always runs these checks with `GITHUB_DATA=fixtures`, so work names in its screenshots are the made-up fixture ones.
+With the Playwright MCP, ask Claude Code to screenshot the page at 1280×800 and 390×844 in both themes and compare them against the PNGs. Claude Code always runs these checks with `GITHUB_DATA=fixtures`, so work names in its screenshots are the made-up fixture ones. The access gate (§7.4) applies to those runs: Claude Code starts its own server with throwaway gate values and unlocks before it screenshots a signed-in page.
 
 ## 13. Screen index
 
@@ -331,8 +353,12 @@ The screens use sample data. Text in square brackets is a placeholder (work repo
 | `state-empty-light.png` / `-dark.png` | Empty range (1W, no commits) |
 | `state-rate-limit-light.png` / `-dark.png` | Rate limit with cached data |
 | `state-token-error-light.png` / `-dark.png` | Token rejected, no cache |
+| `unlock-desktop-light.png` / `-dark.png` | Unlock, 1280px, typing the key (focus ring shown) |
+| `unlock-mobile-light.png` / `-dark.png` | Unlock, 390px |
+| `unlock-error-light.png` / `-dark.png` | Unlock, wrong username or key |
+| `unlock-unavailable-light.png` / `-dark.png` | Unlock, gate not configured (generic message) |
 
-The state screens show the content area only; the header and controls are the same as on the dashboard.
+The state screens show the content area only; the header and controls are the same as on the dashboard, including the Lock button. `dashboard-*` and `profile-*` were re-exported on 29 Oct with the Lock button in the header.
 
 **Known differences (the PNGs are not re-exported; the tokens in section 3 win):**
 - PR status dots: the PNGs show blue (open) and purple (merged) from the first design. The app uses GitHub's own colours: green `pr-open` and purple `pr-merged` (section 3.1). When comparing a screenshot with `dashboard-*` or `state-*`, a green open dot and a slightly different purple merged dot are expected, not a mismatch.

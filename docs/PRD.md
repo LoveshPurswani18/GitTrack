@@ -16,7 +16,7 @@ GitTrack v2 is a personal dashboard that shows, accurately and at a glance, how 
 
 **Non-goals for the MVP**
 
-- Authentication or multiple users
+- Multiple users or full authentication (a single-user access key gate protects the deployed URL, task 3.4)
 - A database or stored history beyond GitHub's own data
 - The MCP server, `/git-track` command and session logging
 - Per-branch breakdowns in the UI (commits are counted from every branch, but the app does not show which branch they were on)
@@ -94,7 +94,8 @@ A single Next.js app with TypeScript, deployed on Vercel, with no database: the 
 Raw events are timezone-free, so switching timezone, range or filter never triggers a new GitHub call.
 
 - **Data sources:** GraphQL `contributionsCollection` lists the repos with my commits, my PRs with their timestamps, and per-day counts used only as a cross-check. Commit counts come from the commits themselves, never from those per-day counts: GraphQL branch histories (first a light list of each repo's branches with their tip dates, then my commits on the branches whose tip is inside the window), a REST fallback for branches with more than 100 of my commits, and the commits inside my PRs. Repos are found from my recent pushes as well as my contributions, so a repo whose work lives only on branches is not missed.
-- **Token:** one dedicated classic personal access token with `repo` and `read:org`, SSO-authorized for WhatBuilds if needed, separate from my gh CLI login. Stored in a server-only environment variable, never prefixed `NEXT_PUBLIC_`.
+- **Token:** one dedicated classic personal access token with `repo`, `read:org` and `read:user`, SSO-authorized for WhatBuilds if needed, separate from my gh CLI login. Stored in a server-only environment variable, never prefixed `NEXT_PUBLIC_`. Kept by decision; the guardrails are in audit 3.5.
+- **Access:** a single-user access key gate (task 3.4): a username (my GitHub username) and a 20+ character random key kept in Apple Passwords, checked against a SHA-256 hash in a server-only environment variable, then a signed 30-day cookie. No auth library, no database. It fails closed: without its settings the app serves nothing. Mechanics: ARCHITECTURE.md section 14.
 - **Caching:** server-side cache of 10–15 minutes, plus a manual refresh. Rate limits are not a concern for one user with caching.
 - **Work repos:** WhatBuilds repos are flagged as work on the server and shown by name, with their PR titles and statuses, like personal repos.
 - **Data source switch:** `GITHUB_DATA=fixtures` serves made-up sample repos and PRs (tests, and every Claude Code session); `GITHUB_DATA=live` reads GitHub and is used only when I run the app or on Vercel. This keeps WhatBuilds data out of Claude Code sessions, as my global rules require.
@@ -127,8 +128,8 @@ The biggest risk is the data layer, which is why the spike comes first; the rest
 | Fetching every branch is slow or hits rate limits | Slow first load, or a failed load | Only repos pushed within the window are scanned, cached for 15 minutes. Branches are listed cheaply (name and tip date), and commit history is read only for branches active in the window, so a repo with over a thousand mostly stale branches (hit on 28 Oct) stays fast. Each request has a timeout and one retry; failures throw instead of undercounting, except a repo with over 5,000 branches, which is cut and logged |
 | A squash or rebase merge double counts work | Inflated days | The PR's own commits are counted and the merge commit is dropped (squash) or matched by author time (rebase) |
 | WhatBuilds blocks or hasn't authorized the token | Work commits silently missing | Spike check 4; authorize SSO or ask an org admin |
-| No auth on the deployed URL | Anyone with the link sees my activity, repo names and PR titles, including WhatBuilds repos | Accepted for the MVP (decided 12 Oct); auth is the first post-MVP item; keep the URL unshared; confirm WhatBuilds is fine with its repo names and PR titles shown |
-| Classic token has write access | A leak could modify repos | Server-only env var, dedicated token, revocable without affecting my gh CLI login |
+| No auth on the deployed URL | Anyone with the link sees my activity, repo names and PR titles, including WhatBuilds repos | Access key gate (task 3.4): username and key, signed 30-day cookie, fails closed. Full auth only if the app goes multi-user or public. Still to confirm: WhatBuilds is fine with its repo names and PR titles shown behind the key |
+| Classic token has write access | A leak could modify repos | Server-only env var, dedicated token, revocable without affecting my gh CLI login. Kept by decision; guardrails in audit 3.5. |
 | A year of commit fetches is slow | Slow first load | Spike: 5.95 s uncached for a year (default branch only), over the 5 s guideline; cache results, fetch only repos with activity, in parallel. Scanning every branch is expected to take longer: measure it with the live-check page |
 
 **Open questions**
@@ -137,7 +138,7 @@ The biggest risk is the data layer, which is why the spike comes first; the rest
 
 **After the MVP, in order**
 
-1. Authentication on the deployed app
+1. Full authentication, only if the app goes multi-user or public (the access key gate covers single-user use)
 2. MCP server with read tools (`get_stats`, `stale_projects`) to query stats from Claude Code
 3. `/git-track` session logging, which brings in a database
 4. Per-branch tracking in the UI, goals, and other shipping signals

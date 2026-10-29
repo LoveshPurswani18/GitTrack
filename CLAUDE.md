@@ -19,7 +19,9 @@ to this project.
 - Tests: Vitest for all metric logic.
 
 ## Commands
-- `pnpm dev` — dev server on http://localhost:3000 (fixture data by default)
+- `pnpm dev` — dev server on http://localhost:3000 (fixture data by default). The access gate
+  is always on: `.env.local` needs `AUTH_KEY_HASH`, `AUTH_COOKIE_SECRET` and `GITHUB_USERNAME`
+  (docs/ARCHITECTURE.md section 14), or every page shows "GitTrack is unavailable".
 - `pnpm build` · `pnpm lint` · `pnpm test`
 
 ## Work data and the company boundary (CRITICAL)
@@ -50,6 +52,12 @@ data yourself. The global company boundary stands; this project does not relax i
 - Metric functions in src/lib/metrics are pure and unit-tested, including a
   late-night IST commit that falls on different days in UTC and Asia/Kolkata.
 - Package manager is pnpm. Never run npm install or create a package-lock.json.
+- Access gate: every server action calls `requireSession()` (`src/lib/auth/session.ts`) as its
+  first line, except `unlock` and `lock`; every data read does too. The proxy is only the first
+  layer. Signed-in pages live in `src/app/(app)/`, the unlock page in `src/app/(gate)/`; never add
+  the header, avatar or any data fetch to the unlock page or the root layout. Never log or print
+  a key, hash or secret.
+- Never read or edit `.env*` files; the user keeps the real access key, hash and secret.
 
 ## UI rules
 - Use only the design tokens (Tailwind classes generated from DESIGN.md section 3).
@@ -59,7 +67,10 @@ data yourself. The global company boundary stands; this project does not relax i
 - Selected segments change colour only: no underline, border or shadow.
 - Every UI change must work in light and dark, at 390px and 1280px wide.
 - Verify with the Playwright MCP against fixture data: screenshot both widths in
-  both themes and compare with the matching PNG in docs/design/screens/.
+  both themes and compare with the matching PNG in docs/design/screens/. The gate applies to
+  your runs too: start your own server on another port (for example 3100, never the user's
+  :3000) with throwaway `AUTH_KEY_HASH`, `AUTH_COOKIE_SECRET` and `GITHUB_USERNAME` passed
+  inline, unlock first, then screenshot.
 
 ## Workflow for this project
 - Start every feature in plan mode and wait for my approval of the plan.

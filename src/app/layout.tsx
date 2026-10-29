@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Suspense } from "react";
-import { AppHeader } from "@/components/layout/AppHeader";
-import { AvatarPlaceholder, HeaderAvatar } from "@/components/layout/HeaderAvatar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,13 +37,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <AppHeader
-          avatar={
-            <Suspense fallback={<AvatarPlaceholder />}>
-              <HeaderAvatar />
-            </Suspense>
-          }
-        />
         {children}
       </body>
     </html>

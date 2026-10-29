@@ -1,5 +1,6 @@
 import "server-only";
 
+import { requireSession } from "@/lib/auth/session";
 import { getConfig, type FixtureState } from "@/lib/config";
 import type { Activity } from "@/types/activity";
 import type { DashboardResult } from "@/types/dashboard";
@@ -61,6 +62,7 @@ export function fixtureDashboard(state: FixtureState | null, now: Date): Promise
 }
 
 export async function getDashboardData(): Promise<DashboardResult> {
+  await requireSession(); // the data layer checks the pass itself, whatever the proxy did
   const config = getConfig();
   if (config.dataSource === "fixtures") return fixtureDashboard(config.fixtureState, new Date());
   return resolveDashboard(getActivity, memoryStore);
