@@ -1,4 +1,4 @@
-import type { Commit } from "@/types/activity";
+import type { CommitStamp } from "@/types/activity";
 import { activeDays } from "./daily";
 import { addDays, toLocalDay } from "./days";
 
@@ -6,7 +6,7 @@ import { addDays, toLocalDay } from "./days";
  * Consecutive active days ending today, or yesterday if today has no commits yet.
  * Uses every commit passed in, so it is capped by the 365-day fetch window.
  */
-export function currentStreak(commits: Commit[], timeZone: string, now: Date): number {
+export function currentStreak(commits: CommitStamp[], timeZone: string, now: Date): number {
   const active = activeDays(commits, timeZone);
   const today = toLocalDay(now, timeZone);
   let day = active.has(today) ? today : addDays(today, -1);
@@ -19,7 +19,7 @@ export function currentStreak(commits: Commit[], timeZone: string, now: Date): n
 }
 
 /** Longest run of consecutive active days in the commits passed in (the fetch window). */
-export function longestStreak(commits: Commit[], timeZone: string): number {
+export function longestStreak(commits: CommitStamp[], timeZone: string): number {
   const days = [...activeDays(commits, timeZone)].sort();
   let longest = 0;
   let run = 0;

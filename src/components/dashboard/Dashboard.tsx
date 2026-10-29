@@ -17,7 +17,7 @@ import {
   thisWeekVsLast,
   totalInRange,
 } from "@/lib/metrics";
-import type { Activity } from "@/types/activity";
+import type { ActivityView } from "@/types/activity";
 import { ActivityCard, type HeatmapData } from "./ActivityCard";
 import { ControlBar } from "./ControlBar";
 import { DashboardSkeleton } from "./DashboardSkeleton";
@@ -35,7 +35,7 @@ export function Dashboard({
   activity,
   cachedAtIso,
 }: {
-  activity: Activity;
+  activity: ActivityView;
   /** Set when this is old data shown after a failed refresh. */
   cachedAtIso?: string;
 }) {
@@ -49,7 +49,7 @@ function DashboardContent({
   env,
   cachedAtIso,
 }: {
-  activity: Activity;
+  activity: ActivityView;
   env: ClientEnvironment;
   cachedAtIso?: string;
 }) {
