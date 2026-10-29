@@ -48,6 +48,17 @@ export function resetAtFromHeaders(headers: HeaderReader, now: Date): string | u
   return undefined;
 }
 
+/**
+ * Makes a message safe to write to the server log (and to paste into a chat): quoted names and
+ * `owner/name` pairs are masked, because GitHub's own messages can echo repository names.
+ */
+export function redactForLog(message: string): string {
+  return message
+    .replace(/'[^']*'|"[^"]*"/g, "'…'")
+    .replace(/\b[\w.-]+\/[\w.-]+\b/g, ":repo")
+    .slice(0, MAX_MESSAGE_LENGTH);
+}
+
 export function networkError(): GitHubError {
   return new GitHubError("network", "Could not reach GitHub");
 }
