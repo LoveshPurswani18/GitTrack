@@ -56,7 +56,7 @@ export function CopyUsername({ login }: { login: string }) {
         onClick={copy}
         aria-label={`Copy username ${login}`}
         // The extra padding makes a 44px tap target on mobile without moving anything.
-        className="inline-flex items-center gap-1.5 rounded-sm font-mono text-[14px] leading-5 text-text-muted hover:text-text-primary -my-3 py-3 sm:my-0 sm:py-0"
+        className="inline-flex items-center gap-1.5 rounded-sm font-mono text-body text-text-muted hover:text-text-primary -my-3 py-3 sm:my-0 sm:py-0"
       >
         @{login}
         {status === "copied" ? (

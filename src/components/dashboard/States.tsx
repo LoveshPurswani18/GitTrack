@@ -42,7 +42,7 @@ export function NoDataCard({ error, tz }: { error: DashboardError; tz: string })
       className="flex flex-col items-center gap-3 rounded-md border border-border bg-surface px-6 py-16 text-center"
     >
       <h2 className="text-heading text-text-primary">No data to show</h2>
-      <p className="text-body max-w-[420px] text-text-secondary">{noData}</p>
+      <p className="text-body max-w-105 text-text-secondary">{noData}</p>
       <Button busy={pending} busyLabel="Refreshing…" onClick={refresh}>
         Try again
       </Button>

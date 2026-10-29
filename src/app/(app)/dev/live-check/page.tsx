@@ -29,7 +29,7 @@ const ZONES = ["Asia/Kolkata", "UTC"] as const;
 export default function LiveCheckPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <main className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+    <main className="mx-auto w-full max-w-5xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
       <h1 className="text-title">Live check</h1>
       <p className="text-body text-text-secondary">
         Temporary page for comparing the data layer with your GitHub profile.

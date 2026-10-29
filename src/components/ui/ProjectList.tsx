@@ -10,11 +10,11 @@ export function SeriesLegend() {
   return (
     <div className="text-caption flex items-center gap-3 text-text-muted">
       <span className="inline-flex items-center gap-1.5">
-        <span aria-hidden="true" className="h-2 w-2 rounded-full bg-series-personal" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-series-personal" />
         Personal
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span aria-hidden="true" className="h-2 w-2 rounded-full bg-series-work" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-series-work" />
         Work
       </span>
     </div>

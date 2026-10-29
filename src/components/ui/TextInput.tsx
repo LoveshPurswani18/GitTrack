@@ -44,7 +44,7 @@ export function TextInput({ label, invalid, error, password, ...input }: Props) 
             onClick={() => setShown((value) => !value)}
             aria-label={shown ? "Hide key" : "Show key"}
             aria-pressed={shown}
-            className="absolute top-1 right-1 flex h-9 w-9 items-center justify-center rounded-sm text-text-muted hover:bg-surface-hover"
+            className="absolute top-1 right-1 flex size-9 items-center justify-center rounded-sm text-text-muted hover:bg-surface-hover"
           >
             {shown ? (
               <EyeOff size={16} strokeWidth={1.5} aria-hidden="true" />

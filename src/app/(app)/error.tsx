@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/Button";
 export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
   return (
-    <main id="main" className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+    <main id="main" className="mx-auto w-full max-w-5xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
       <h1 className="text-title">Activity</h1>
       <div className="mt-6 flex flex-col items-start gap-4">
         <Banner tone="danger" title="Something went wrong">

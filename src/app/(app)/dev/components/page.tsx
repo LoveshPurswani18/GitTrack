@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Components" };
 export default function ComponentsPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <main className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+    <main className="mx-auto w-full max-w-5xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
       <h1 className="text-title">Components</h1>
       <p className="text-body text-text-secondary">
         Every ui primitive in every state, with made-up data. Not part of the product.

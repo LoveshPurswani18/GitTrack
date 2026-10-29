@@ -14,15 +14,15 @@ export const metadata: Metadata = { title: "Unlock", robots: { index: false, fol
  */
 export default function UnlockPage() {
   return (
-    <main id="main" className="mx-auto flex w-full max-w-[1024px] flex-col items-center px-4 pt-[72px] pb-12 sm:pt-32">
+    <main id="main" className="mx-auto flex w-full max-w-5xl flex-col items-center px-4 pt-18 pb-12 sm:pt-32">
       <div className="flex items-center gap-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-ink.svg" alt="" width={28} height={28} className="logo-ink" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-white.svg" alt="" width={28} height={28} className="logo-white" />
-        <span className="text-[20px] leading-7 font-semibold">GitTrack</span>
+        <span className="text-xl font-semibold">GitTrack</span>
       </div>
-      <div className="mt-6 w-full max-w-[360px] rounded-md border border-border bg-surface p-6 sm:p-8">
+      <div className="mt-6 w-full max-w-90 rounded-md border border-border bg-surface p-6 sm:p-8">
         <Suspense fallback={null}>
           <UnlockBody />
         </Suspense>
@@ -43,7 +43,7 @@ async function UnlockBody() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-[20px] leading-7 font-semibold">Unlock GitTrack</h1>
+        <h1 className="text-xl font-semibold">Unlock GitTrack</h1>
         <p className="text-body text-text-secondary">
           This dashboard is private. Sign in with your username and access key.
         </p>

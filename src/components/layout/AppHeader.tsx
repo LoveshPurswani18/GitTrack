@@ -17,7 +17,7 @@ export function AppHeader({ avatar }: { avatar: ReactNode }) {
 
   return (
     <header className="sticky top-0 z-40 h-14 border-b border-border bg-bg">
-      <div className="mx-auto flex h-full max-w-[1024px] items-center gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex h-full max-w-5xl items-center gap-6 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 rounded-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-ink.svg" alt="" width={20} height={20} className="logo-ink" />
@@ -50,7 +50,7 @@ export function AppHeader({ avatar }: { avatar: ReactNode }) {
           <Link
             href="/profile"
             aria-label="Profile"
-            className="flex h-11 w-11 items-center justify-center rounded-full sm:h-7 sm:w-7"
+            className="flex size-11 items-center justify-center rounded-full sm:size-7"
           >
             {avatar}
           </Link>

@@ -57,7 +57,7 @@ export function Button(props: Props) {
   const inactive = busy || disabled;
   const classes = cx(
     "text-label inline-flex items-center justify-center gap-2 rounded-sm whitespace-nowrap",
-    iconOnly ? "h-11 w-11 sm:h-8 sm:w-8" : "h-9 px-3 sm:h-8",
+    iconOnly ? "size-11 sm:size-8" : "h-9 px-3 sm:h-8",
     VARIANTS[variant],
     inactive && "cursor-not-allowed opacity-50",
     className,

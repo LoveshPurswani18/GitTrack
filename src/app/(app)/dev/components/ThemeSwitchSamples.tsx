@@ -10,7 +10,7 @@ import { cx } from "@/components/ui/cx";
 type Size = "desktop" | "mobile";
 type Mode = "system" | "light" | "dark";
 
-const CELL: Record<Size, string> = { desktop: "h-7 w-7", mobile: "h-11 w-11" };
+const CELL: Record<Size, string> = { desktop: "size-7", mobile: "size-11" };
 
 const MODES: { value: Mode; label: string; Icon: LucideIcon }[] = [
   { value: "system", label: "Follow system theme", Icon: Monitor },
@@ -113,8 +113,8 @@ function SlidingSwitch({
 // knob bg, so on a light page it reads dark-track/white-knob and on a dark page the reverse.
 // Flat: the reference's drop shadow is left out (DESIGN.md allows no shadows besides popovers).
 const PILL: Record<Size, { track: string; knob: string; travel: string }> = {
-  desktop: { track: "h-8 w-14", knob: "h-6 w-6", travel: "translate-x-6" },
-  mobile: { track: "h-11 w-20", knob: "h-9 w-9", travel: "translate-x-9" },
+  desktop: { track: "h-8 w-14", knob: "size-6", travel: "translate-x-6" },
+  mobile: { track: "h-11 w-20", knob: "size-9", travel: "translate-x-9" },
 };
 
 function PillSwitch({
@@ -155,12 +155,12 @@ function PillSwitch({
 function MobileHeader({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-14 w-full max-w-sm items-center gap-2 border border-border bg-bg px-4">
-      <span aria-hidden="true" className="h-5 w-5 rounded-[2px] bg-text-primary" />
+      <span aria-hidden="true" className="size-5 rounded-xs bg-text-primary" />
       <span className="text-heading">GitTrack</span>
       <div className="ml-auto flex items-center gap-2">
         {children}
-        <span aria-hidden="true" className="h-11 w-11 rounded-full p-2">
-          <span className="block h-7 w-7 rounded-full border border-border bg-surface-hover" />
+        <span aria-hidden="true" className="size-11 rounded-full p-2">
+          <span className="block size-7 rounded-full border border-border bg-surface-hover" />
         </span>
       </div>
     </div>
