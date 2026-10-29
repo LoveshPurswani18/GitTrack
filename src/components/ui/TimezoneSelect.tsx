@@ -107,6 +107,10 @@ export function TimezoneSelect({
         aria-expanded={open}
         aria-label={`Timezone: ${value}`}
         onClick={() => {
+          if (open) {
+            close(false); // also clears the search, so the next open starts unfiltered
+            return;
+          }
           setActive(Math.max(0, [...pinned, ...rest].indexOf(value)));
           setNow(new Date());
           setOpen((o) => !o);
