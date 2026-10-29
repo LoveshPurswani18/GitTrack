@@ -135,3 +135,141 @@ describe("pool", () => {
     ).rejects.toMatchObject({ kind: "network" });
   });
 });
+
+describe("failure logging", () => {
+  function loggedClient(handler: Parameters<typeof createFakeFetch>[0]) {
+    const lines: string[] = [];
+    const fake = createFakeFetch(handler);
+    const client = createGitHubClient({
+      token: TOKEN,
+      fetchImpl: fake.fetch,
+      now: () => NOW,
+      log: (line) => lines.push(line),
+      retryDelayMs: 0,
+    });
+    return { client, lines, fake };
+  }
+
+  it("logs the kind, query name and status of a failed GraphQL call, never the token", async () => {
+    const { client, lines } = loggedClient(() => jsonResponse({ message: "Bad gateway" }, { status: 502 }));
+    await expect(client.graphql("query BranchHistories($a: Int) { x }", {})).rejects.toBeInstanceOf(GitHubError);
+    expect(lines).toHaveLength(2); // the first try (retrying) and the retry
+    expect(lines[0]).toMatch(/^\[github\] network graphql BranchHistories status=502 \d+ms: .*retrying/);
+    expect(lines[1]).toMatch(/^\[github\] network graphql BranchHistories status=502 \d+ms: /);
+    expect(lines.join("\n")).not.toContain(TOKEN);
+  });
+
+  it("logs the GraphQL error type when the body has errors and no data", async () => {
+    const { client, lines } = loggedClient(() =>
+      jsonResponse({ data: null, errors: [{ type: "TIMEOUT", message: "Query timed out" }] }),
+    );
+    await expect(client.graphql("query Activity { x }", {})).rejects.toBeInstanceOf(GitHubError);
+    expect(lines[0]).toContain("graphql Activity status=200");
+    expect(lines[0]).toContain("TIMEOUT: Query timed out");
+  });
+
+  it("masks repo and user names in REST paths and drops the query string", async () => {
+    const { client, lines } = loggedClient(() => jsonResponse({ message: "Server Error" }, { status: 500 }));
+    await expect(client.restPages("/repos/some-org/some-repo/commits?per_page=100")).rejects.toBeInstanceOf(GitHubError);
+    await expect(client.rest("/users/some-user")).rejects.toBeInstanceOf(GitHubError);
+    expect(lines[0]).toContain("rest /repos/:repo/commits status=500");
+    expect(lines[1]).toContain("rest /users/:user status=500");
+    expect(lines.join("\n")).not.toMatch(/some-org|some-repo|some-user|per_page/);
+  });
+
+  it("masks quoted names and owner/name pairs echoed in GitHub's message", async () => {
+    const { client, lines } = loggedClient(() =>
+      jsonResponse({ message: "Could not resolve 'secret-repo' for secret-org/secret-repo" }, { status: 404 }),
+    );
+    await expect(client.rest("/users/x")).rejects.toBeInstanceOf(GitHubError);
+    expect(lines[0]).not.toMatch(/secret/);
+  });
+
+  it("logs the underlying cause when fetch itself throws", async () => {
+    const lines: string[] = [];
+    const client = createGitHubClient({
+      token: TOKEN,
+      fetchImpl: (async () => {
+        throw new TypeError("fetch failed", { cause: Object.assign(new Error("reset"), { code: "ECONNRESET" }) });
+      }) as typeof fetch,
+      log: (line) => lines.push(line),
+      retryDelayMs: 0,
+    });
+    await expect(client.rest("/users/x")).rejects.toMatchObject({ kind: "network", message: "Could not reach GitHub" });
+    expect(lines[0]).toMatch(/network rest \/users\/:user status=none \d+ms: fetch failed \(ECONNRESET\)/);
+  });
+
+  it("logs nothing on success", async () => {
+    const { client, lines } = loggedClient(() => jsonResponse({ login: "demo-user" }));
+    await client.rest("/users/demo-user");
+    expect(lines).toEqual([]);
+  });
+});
+
+describe("timeout and retry", () => {
+  const reset = () => new TypeError("fetch failed", { cause: Object.assign(new Error("reset"), { code: "ECONNRESET" }) });
+
+  function flaky(outcomes: (Response | Error)[]) {
+    const lines: string[] = [];
+    let calls = 0;
+    const fetchImpl = (async () => {
+      const outcome = outcomes[Math.min(calls++, outcomes.length - 1)];
+      if (outcome instanceof Error) throw outcome;
+      return outcome.clone();
+    }) as typeof fetch;
+    const client = createGitHubClient({
+      token: TOKEN,
+      fetchImpl,
+      now: () => NOW,
+      log: (line) => lines.push(line),
+      retryDelayMs: 0,
+      timeoutMs: 50,
+    });
+    return { client, lines, calls: () => calls };
+  }
+
+  it("retries once after a connection reset and succeeds", async () => {
+    const { client, lines, calls } = flaky([reset(), jsonResponse({ login: "demo-user" })]);
+    await expect(client.rest("/users/demo-user")).resolves.toEqual({ login: "demo-user" });
+    expect(calls()).toBe(2);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain("fetch failed (ECONNRESET); retrying");
+  });
+
+  it("gives up after the one retry", async () => {
+    const { client, calls } = flaky([reset()]);
+    await expect(client.rest("/users/demo-user")).rejects.toMatchObject({ kind: "network" });
+    expect(calls()).toBe(2);
+  });
+
+  it("retries a 502 once and succeeds", async () => {
+    const { client, calls } = flaky([jsonResponse({ message: "Bad gateway" }, { status: 502 }), jsonResponse({ ok: true })]);
+    await expect(client.rest("/users/demo-user")).resolves.toEqual({ ok: true });
+    expect(calls()).toBe(2);
+  });
+
+  it("does not retry a rejected token, a rate limit or a 500", async () => {
+    for (const status of [401, 429, 500]) {
+      const { client, calls } = flaky([jsonResponse({ message: "nope" }, { status })]);
+      await expect(client.rest("/users/demo-user")).rejects.toBeInstanceOf(GitHubError);
+      expect(calls()).toBe(1);
+    }
+  });
+
+  it("times out a request that never answers", async () => {
+    const lines: string[] = [];
+    const client = createGitHubClient({
+      token: TOKEN,
+      fetchImpl: ((_url: string, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(init.signal!.reason));
+        })) as typeof fetch,
+      log: (line) => lines.push(line),
+      timeoutMs: 20,
+      retryDelayMs: 0,
+    });
+    await expect(client.rest("/users/demo-user")).rejects.toMatchObject({ kind: "network" });
+    expect(lines[0]).toContain("fetch failed (TimeoutError); retrying");
+    expect(lines).toHaveLength(2);
+  });
+});

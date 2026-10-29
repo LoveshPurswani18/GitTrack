@@ -144,14 +144,26 @@ Commits are counted from **every branch** (PRD, Commit definition). `fetchLiveAc
 3. **Scan set** = contribution repos plus discovered repos, minus forks and repos without a
    default branch. PR-only repos (open-source repos I do not belong to) are listed but never
    scanned, and their PR commits are not counted.
-4. **Branch histories, GraphQL, 5 repos per request** (aliases): every branch under
-   `refs/heads/` (50 per page, follow-up queries for repos with more) with
-   `history(first: 100, since, author: {id})`, which returns only my commits. A branch with more
-   than 100 of my commits in the window (`hasNextPage`) is re-fetched completely with REST:
-   `GET /repos/{owner}/{repo}/commits?author={username}&sha={branch}&since=&until=&per_page=100`,
-   following `Link` pagination. `since`/`until` are widened by 3 days (they filter on committer
-   date) and the real filter is the commit's `author.date` inside the window. A 409 (empty repo)
-   means no commits. Any other failure throws, so commits are never silently undercounted.
+4. **Branch scan, two GraphQL steps.** GitHub gives no usable order for branches (ordering by
+   commit date is ignored), and one repo can have over a thousand, so the scan does not page
+   through history.
+   - *Step A, list (light):* 5 repos per request (aliases), every branch under `refs/heads/`
+     with only its name and tip `committedDate`, 100 per page, follow-up queries for repos with
+     more. A branch whose tip is older than the window start (minus the 3-day pad) cannot hold a
+     commit in it, so only branches with a tip inside the window are kept as *active*. A safety
+     cap of 5,000 branches per repo logs `[github] branch list cut at 5000 branches of :repo` and
+     carries on with what was listed. This is the one place the scan can undercount.
+   - *Step B, history (active branches only):* per repo, up to 25 named branches per request
+     (`ref(qualifiedName:)` aliases), 6 requests at once, each with
+     `history(first: 100, since, author: {id})`, which returns only my commits. A branch deleted
+     since step A comes back null and is skipped.
+   - A branch with more than 100 of my commits in the window (`hasNextPage`) is re-fetched
+     completely with REST:
+     `GET /repos/{owner}/{repo}/commits?author={username}&sha={branch}&since=&until=&per_page=100`,
+     following `Link` pagination. `since`/`until` are widened by 3 days (they filter on committer
+     date) and the real filter is the commit's `author.date` inside the window. A 409 (empty repo)
+     means no commits. Any other failure throws, so commits are never silently undercounted
+     (apart from the logged 5,000-branch cap above).
 5. **PR commits.** For PRs in scanned repos, the PR's commits that I authored are added
    (matched on the author login). A PR with more than 100 commits is read through
    `GET /repos/{owner}/{repo}/pulls/{number}/commits` (GitHub lists at most 250). This is what
@@ -230,6 +242,12 @@ renders the matching banner (`stateCopy.ts` holds the wording; times are shown i
 timezone). Anything that is not a `GitHubError` (bad configuration, a bug) is rethrown to
 `error.tsx`, which shows a generic message with no details. Error messages never include the
 token.
+
+Every request in `client.ts` has a 30 second timeout. A request that throws (reset, timeout) or
+gets a 502, 503 or 504 is retried once after a second; token errors, rate limits and other
+statuses are not. Each failed request writes one `[github]` line to the server log (kind, call,
+status, time, reason) and each live fetch logs its outcome. Repo and user names are masked in
+those lines (`redactForLog`), so they are safe to paste.
 
 ## 9. Metrics (`src/lib/metrics/`) — pure, tested, timezone-aware
 
@@ -375,7 +393,7 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 
 ## 13. Testing and verification
 
-- `pnpm test` runs Vitest on `lib/metrics` and `lib/github/normalize`.
+- `pnpm test` runs Vitest on `lib/metrics` and `lib/github` (normalize, the client with a fake `fetch`, errors, live fetch and the dashboard states).
 - `pnpm lint` and `pnpm build` must pass before any commit proposal.
 - UI: Playwright MCP screenshots at 1280×800 and 390×844, light and dark,
   compared against `docs/design/screens/` (DESIGN.md §12). Always use fixtures.

@@ -19,22 +19,55 @@ const WORK_ORG = "work-org";
 
 type GraphQLCall = { query: string; variables: Record<string, unknown> };
 
-/** One answer per branch-history request: each aliased repo (r0, r1, ...) from the fixtures. */
-function branchData(variables: Record<string, unknown>) {
+type FixtureBranch = { name: string; target: { committedDate?: string; history?: unknown } | null };
+type FixtureRefs = { refs: { nodes: FixtureBranch[] } };
+
+/** Step A: each aliased repo (r0, r1, ...) lists its branches with names and tip dates only. */
+function branchListData(variables: Record<string, unknown>) {
   const data: Record<string, unknown> = {};
   for (let i = 0; `o${i}` in variables; i++) {
     const repo = `${variables[`o${i}`]}/${variables[`n${i}`]}`;
     const secondPage = repo === "Work-Org/work-repo-a" && variables.after === "refs-cursor-1";
-    data[`r${i}`] = secondPage ? branchesWorkAPage2 : ((branchesRaw as Record<string, unknown>)[repo] ?? null);
+    const page = (secondPage ? branchesWorkAPage2 : (branchesRaw as Record<string, unknown>)[repo]) as
+      | (FixtureRefs & { refs: { pageInfo: unknown } })
+      | null
+      | undefined;
+    data[`r${i}`] = page
+      ? {
+          refs: {
+            pageInfo: page.refs.pageInfo,
+            nodes: page.refs.nodes.map(({ name, target }) => ({
+              name,
+              target: target && "committedDate" in target ? { committedDate: target.committedDate } : target,
+            })),
+          },
+        }
+      : null;
   }
   return data;
+}
+
+/** Step B: the named branches (b0, b1, ...) of one repo, with the commit history from the fixtures. */
+function historyData(variables: Record<string, unknown>) {
+  const repo = `${variables.o}/${variables.n}`;
+  const known = (branchesRaw as Record<string, FixtureRefs | null>)[repo];
+  if (!known) return { repository: null };
+  const branches = [...known.refs.nodes, ...(repo === "Work-Org/work-repo-a" ? branchesWorkAPage2.refs.nodes : [])];
+  const aliases: Record<string, unknown> = {};
+  for (let i = 0; `q${i}` in variables; i++) {
+    const name = String(variables[`q${i}`]).replace("refs/heads/", "");
+    const branch = branches.find((b) => b.name === name);
+    aliases[`b${i}`] = branch ? { target: branch.target && { history: branch.target.history } } : null;
+  }
+  return { repository: aliases };
 }
 
 function route(request: FakeRequest): Response {
   const { url } = request;
   if (url.endsWith("/graphql")) {
     const { query, variables } = JSON.parse(request.body!) as GraphQLCall;
-    if (query.includes("BranchRefs")) return jsonResponse({ data: branchData(variables) });
+    if (query.includes("query BranchList")) return jsonResponse({ data: branchListData(variables) });
+    if (query.includes("query BranchHistories")) return jsonResponse({ data: historyData(variables) });
     if (query.includes("repositories(")) {
       return jsonResponse(variables.after === "repo-cursor-1" ? reposPage2 : reposPage1);
     }
@@ -54,20 +87,28 @@ function route(request: FakeRequest): Response {
 
 function setup(handler: (request: FakeRequest) => Response = route) {
   const fake = createFakeFetch(handler);
-  const client = createGitHubClient({ token: "ghp_testtoken", fetchImpl: fake.fetch, now: () => NOW });
-  return { fake, client };
+  const lines: string[] = [];
+  const client = createGitHubClient({
+    token: "ghp_testtoken",
+    fetchImpl: fake.fetch,
+    now: () => NOW,
+    log: (line) => lines.push(line),
+  });
+  return { fake, client, lines };
 }
 
 async function load(handler?: (request: FakeRequest) => Response) {
-  const { fake, client } = setup(handler);
+  const { fake, client, lines } = setup(handler);
   const activity = await fetchLiveActivity({ username: "demo-user", workOrg: WORK_ORG, client, now: NOW });
-  return { activity, fake };
+  return { activity, fake, lines };
 }
 
 const graphqlCalls = (fake: { requests: FakeRequest[] }): GraphQLCall[] =>
   fake.requests.filter((r) => r.url.endsWith("/graphql")).map((r) => JSON.parse(r.body!) as GraphQLCall);
 const branchCalls = (fake: { requests: FakeRequest[] }) =>
-  graphqlCalls(fake).filter((c) => c.query.includes("BranchRefs"));
+  graphqlCalls(fake).filter((c) => c.query.includes("query BranchList"));
+const historyCalls = (fake: { requests: FakeRequest[] }) =>
+  graphqlCalls(fake).filter((c) => c.query.includes("query BranchHistories"));
 const restCalls = (fake: { requests: FakeRequest[] }) =>
   fake.requests.map((r) => r.url).filter((u) => !u.endsWith("/graphql"));
 /** "a1:default" or "f1:branch": the sha tag and whether it is on the default branch. */
@@ -128,10 +169,12 @@ describe("fetchLiveActivity", () => {
     // Not scanned: a fork, a repo without a default branch, and a repo that only has a PR.
     const names = scanned.flat().join(" ");
     expect(["forked-lib", "no-branch", "oss-project"].some((n) => names.includes(n))).toBe(false);
-    expect(calls.every((c) => c.variables.userId === "U_demo")).toBe(true);
-    expect(calls[0].variables.since).toBe("2025-10-12T12:00:00.000Z"); // window start − 3 days
-    expect(calls[0].query).toContain("author: { id: $userId }");
     expect(calls[0].query).toContain('refPrefix: "refs/heads/"');
+    expect(calls[0].query).not.toContain("history("); // the listing is light: names and tip dates
+    const histories = historyCalls(fake);
+    expect(histories.every((c) => c.variables.userId === "U_demo")).toBe(true);
+    expect(histories[0].variables.since).toBe("2025-10-12T12:00:00.000Z"); // window start − 3 days
+    expect(histories[0].query).toContain("author: { id: $userId }");
   });
 
   it("keeps paging a repo that has more branches than one page", async () => {
@@ -227,8 +270,9 @@ describe("fetchLiveActivity", () => {
 
   it("makes a small, bounded number of GraphQL calls", async () => {
     const { fake } = await load();
-    // activity + PR page, 2 discovery pages, 2 branch batches + 1 branch follow-up page.
-    expect(graphqlCalls(fake)).toHaveLength(7);
+    // activity + PR page, 2 discovery pages, 2 branch-list batches + 1 list follow-up page,
+    // then one history request for each of the 5 repos that have an active branch.
+    expect(graphqlCalls(fake)).toHaveLength(12);
   });
 
   it("carries the restricted count and the debug cross-check", async () => {
@@ -267,7 +311,7 @@ describe("fetchLiveActivity", () => {
     const hidden = (request: FakeRequest) => {
       if (request.url.endsWith("/graphql")) {
         const { query } = JSON.parse(request.body!) as GraphQLCall;
-        if (query.includes("BranchRefs")) return jsonResponse({ data: { r0: null } });
+        if (query.includes("query BranchList")) return jsonResponse({ data: { r0: null } });
       }
       return route(request);
     };
@@ -350,5 +394,112 @@ describe("fetchLiveProfile", () => {
     expect(profile.fetchedAt).toBe(NOW.toISOString());
     expect(profile.publicRepos).toBe(27);
     expect(fake.requests).toHaveLength(1);
+  });
+});
+
+describe("branch scan for repos with many branches", () => {
+  const ACTIVE = "2026-10-10T00:00:00Z";
+  const OLD = "2025-01-01T00:00:00Z"; // before the window (it starts 2025-10-12 with padding)
+
+  const listed = (name: string, committedDate: string) => ({ name, target: { committedDate } });
+  const historyOf = (oid: string) => ({
+    history: { pageInfo: { hasNextPage: false }, nodes: [{ oid, authoredDate: ACTIVE }] },
+  });
+
+  /**
+   * work-repo-a lists its branches from `listPage(after)`; every other repo and every history
+   * request uses the fixtures, except where `history` answers a branch for work-repo-a.
+   */
+  function bigWorkRepo(
+    listPage: (after: string | null) => { nodes: ReturnType<typeof listed>[]; next: string | null },
+    history: (branch: string) => unknown = (branch) => historyOf(`c0${branch.length}`.padEnd(40, "0")),
+  ) {
+    return (request: FakeRequest) => {
+      if (request.url.endsWith("/graphql")) {
+        const { query, variables } = JSON.parse(request.body!) as GraphQLCall;
+        if (query.includes("query BranchList")) {
+          const data = branchListData(variables) as Record<string, unknown>;
+          for (let i = 0; `o${i}` in variables; i++) {
+            if (`${variables[`o${i}`]}/${variables[`n${i}`]}` !== "Work-Org/work-repo-a") continue;
+            const { nodes, next } = listPage((variables.after as string | null) ?? null);
+            data[`r${i}`] = { refs: { pageInfo: { hasNextPage: next !== null, endCursor: next }, nodes } };
+          }
+          return jsonResponse({ data });
+        }
+        if (query.includes("query BranchHistories") && variables.n === "work-repo-a") {
+          const aliases: Record<string, unknown> = {};
+          for (let i = 0; `q${i}` in variables; i++) {
+            const branch = String(variables[`q${i}`]).replace("refs/heads/", "");
+            const result = history(branch);
+            aliases[`b${i}`] = result === null ? null : { target: result };
+          }
+          return jsonResponse({ data: { repository: aliases } });
+        }
+      }
+      return route(request);
+    };
+  }
+  const workAHistories = (fake: { requests: FakeRequest[] }) =>
+    historyCalls(fake).filter((c) => c.variables.n === "work-repo-a");
+  const askedFor = (call: GraphQLCall) =>
+    Object.entries(call.variables)
+      .filter(([key]) => /^q\d+$/.test(key))
+      .map(([, value]) => String(value).replace("refs/heads/", ""));
+
+  it("never asks for the history of a branch whose tip is before the window", async () => {
+    const { fake } = await load();
+    const asked = historyCalls(fake).flatMap(askedFor);
+    expect(asked).not.toContain("feat/stale");
+    expect(asked).toContain("feat/metrics");
+  });
+
+  it("lists all 14 pages of a 1,300-branch repo but reads history only for the active branches", async () => {
+    const pages = Array.from({ length: 14 }, (_, p) => ({
+      nodes: Array.from({ length: p === 13 ? 18 : 100 }, (_, i) =>
+        listed(`old-${p}-${i}`, p === 3 && i === 7 ? ACTIVE : p === 9 && i === 1 ? ACTIVE : OLD),
+      ),
+      next: p === 13 ? null : `page-${p + 1}`,
+    }));
+    const { fake, lines } = await load(bigWorkRepo((after) => pages[after ? Number(after.slice(5)) : 0]));
+    const cursors = branchCalls(fake)
+      .filter((c) => c.variables.n0 === "work-repo-a" || c.variables.after !== null)
+      .map((c) => c.variables.after);
+    expect(cursors).toContain("page-13");
+    const histories = workAHistories(fake);
+    expect(histories).toHaveLength(1);
+    expect(askedFor(histories[0]).sort()).toEqual(["old-3-7", "old-9-1"]);
+    expect(lines).toEqual([]);
+  });
+
+  it("splits more than 25 active branches into several history requests", async () => {
+    const nodes = Array.from({ length: 30 }, (_, i) => listed(`feat-${i}`, ACTIVE));
+    const { fake } = await load(bigWorkRepo(() => ({ nodes, next: null })));
+    const histories = workAHistories(fake);
+    expect(histories.map((c) => askedFor(c).length).sort((a, b) => a - b)).toEqual([5, 25]);
+  });
+
+  it("skips a branch that was deleted after it was listed", async () => {
+    const nodes = [listed("keep", ACTIVE), listed("gone", ACTIVE)];
+    const { activity } = await load(
+      bigWorkRepo(
+        () => ({ nodes, next: null }),
+        (branch) => (branch === "gone" ? null : historyOf("d".repeat(40))),
+      ),
+    );
+    const shas = activity.commits.map((c) => c.sha);
+    expect(shas).toContain("d".repeat(40));
+  });
+
+  it("cuts the branch list at the safety cap, logs it, and still loads", async () => {
+    const nodes = Array.from({ length: 100 }, (_, i) => listed(`b${i}`, OLD));
+    const { fake, lines } = await load(bigWorkRepo(() => ({ nodes, next: "more" })));
+    expect(lines).toContain("[github] branch list cut at 5000 branches of :repo");
+    expect(branchCalls(fake).filter((c) => c.variables.after === "more")).toHaveLength(49);
+  });
+
+  it("does not depend on the order GitHub returns branches in", async () => {
+    const { fake } = await load();
+    expect(branchCalls(fake).every((c) => !c.query.includes("orderBy"))).toBe(true);
+    expect(historyCalls(fake).every((c) => !c.query.includes("orderBy"))).toBe(true);
   });
 });

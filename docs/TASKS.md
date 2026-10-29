@@ -113,6 +113,15 @@ are untouched.
 - [x] Lighthouse on fixtures: performance and accessibility ≥ 90
 - **Done when:** the DESIGN.md §12 checklist passes on every screen.
 
+### 3.3a Many-branch repos · `feat/github-error-logging`
+Added 29 Oct: live mode failed with "Could not reach GitHub" after I was added to a repo with 1,318 branches.
+- [x] `[github]` server log for every failed request and every live fetch (call, status, time, cause; repo and user names masked)
+- [x] Request timeout (30 s) and one retry on resets and 502/503/504
+- [x] Two-step branch scan: list branch tip dates, fetch history only for active branches; 5,000-branch list cap logged, not thrown
+- [x] Tests with fake fetch (retry, timeout, masking, 14-page repo, deleted branch, cap); ARCHITECTURE §6.4 and §8 and the PRD data sources updated
+- [x] **(me)** Live check: the page loads with the many-branch repo (uncached load 41.6 s)
+- **Done when:** live mode loads without errors and the many-branch repo is counted on every active branch.
+
 ### 3.4 Pre-deploy audit · `chore/audit`
 Whole-app audit before `v2` goes to `main`, all on one branch. Scaled to a single-user
 dashboard that will sit on a public domain with no auth, a write-capable token and work
@@ -124,8 +133,8 @@ fixtures; **(me)** lines need live data or my accounts.
 - [ ] **Public surface:** `pnpm build && pnpm start`, then `/dev/components` and `/dev/live-check` return 404; security headers (frame, referrer, content-type) and `noindex` set; error and state pages show no stack, token or raw API text; the Refresh server action cannot be abused to burn the rate limit (add a cooldown or document why not)
 - [ ] **Dependencies:** `pnpm audit` (prod deps must be clean; the known dev-only `braces` advisory is recorded), unused deps, lockfile consistent, `engines`/`packageManager` match Vercel
 - [ ] **Metrics are solid:** every definition in PRD §Metric definitions maps to a pure function and a test (active day, both streaks, this week vs last, range total, per-project share, PR opened/open/merged); add any missing case (empty range, streak ending yesterday vs broken today, Monday week boundary, 01:00 IST commit in UTC vs IST, superseded commits, feature-branch-only commits, fork and duplicate sha); check that stat cards, heatmap, project list and range total always agree for every range, repo scope and timezone; metrics have no `Date.now()` and no React or `lib/github` imports; **(me)** repeat the 30-random-day and streak check on the final build, in step 3.5
-- [ ] **Resilience and cost:** each fixture state (empty, `rate_limit`, `token_error`, network) renders correctly; live fetch fails loudly rather than undercounting; uncached load time and GitHub rate-limit use measured via `/dev/live-check` **(me)**; cache is 15 min and Refresh invalidates only the `github` tag
-- [ ] **Code health:** `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` clean; no `console.log`, dead code or stray TODOs; `coderabbit-review` over the full `main...v2` diff, plus `/security-review` as a second pass
+- [ ] **Resilience and cost:** each fixture state (empty, `rate_limit`, `token_error`, network) renders correctly; live fetch fails loudly rather than undercounting (the one logged exception is a repo cut at 5,000 branches); uncached load time and GitHub rate-limit use measured via `/dev/live-check` **(me)**; cache is 15 min and Refresh invalidates only the `github` tag
+- [ ] **Code health:** `pnpm lint`, `tsc --noEmit`, `pnpm test`, `pnpm build` clean; no `console.log`, dead code or stray TODOs (the `[github]` server logs in `client.ts` and `index.ts` are deliberate); `coderabbit-review` over the full `main...v2` diff, plus `/security-review` as a second pass
 - [ ] **Design-system conformance:** repo-wide search for raw hex, `shadow`, blur, gradients and off-scale spacing outside `tokens.css`; mono used for numbers only; quick re-check that 3.3 left every screen and state matching its PNG in both themes at 390 and 1280 px
 - [ ] **Repo and docs hygiene:** README describes v2, not the old Vite app; no leftover Vite files, `package-lock.json` or temp files in the `v2` → `main` diff; PRD, ARCHITECTURE and TASKS match what was built; `.coderabbit.yaml` decision from the Parking lot
 - [ ] **Deploy readiness:** env var names in ARCHITECTURE §4 match what the code reads; `GITHUB_DATA` cannot reach `live` by accident (preview vs production); **(me)** a Vercel preview with live env loads once before the merge

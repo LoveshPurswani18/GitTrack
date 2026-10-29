@@ -54,6 +54,8 @@ export type RawBranchHistory = {
   name: string;
   /** Empty when the ref does not point at a commit. */
   target: {
+    /** The branch tip's commit date; only requested when listing branches, to find the active ones. */
+    committedDate?: string;
     history?: {
       pageInfo: { hasNextPage: boolean };
       nodes: { oid: string; authoredDate: string }[];

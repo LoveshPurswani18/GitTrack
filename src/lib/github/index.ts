@@ -8,6 +8,7 @@ import { createGitHubClient } from "./client";
 import {
   GitHubError,
   deserializeError,
+  redactForLog,
   serializeError,
   type SerializedGitHubError,
 } from "./errors";
@@ -23,11 +24,20 @@ const LIVE_LIFETIME = { stale: 300, revalidate: 900, expire: 3600 };
  */
 type Cached<T> = { ok: true; data: T } | { ok: false; error: SerializedGitHubError };
 
-async function attempt<T>(run: () => Promise<T>): Promise<Cached<T>> {
+async function attempt<T>(name: string, run: () => Promise<T>): Promise<Cached<T>> {
+  const started = Date.now();
+  const seconds = () => ((Date.now() - started) / 1000).toFixed(1);
   try {
-    return { ok: true, data: await run() };
+    const data = await run();
+    console.info(`[github] live ${name} ok in ${seconds()}s`);
+    return { ok: true, data };
   } catch (error) {
-    if (error instanceof GitHubError) return { ok: false, error: serializeError(error) };
+    if (error instanceof GitHubError) {
+      console.error(
+        `[github] live ${name} failed after ${seconds()}s: ${error.kind} - ${redactForLog(error.message)}`,
+      );
+      return { ok: false, error: serializeError(error) };
+    }
     throw error; // misconfiguration and bugs surface through error.tsx, uncached
   }
 }
@@ -46,7 +56,7 @@ function liveClient() {
 async function getLiveActivity(): Promise<Cached<Activity>> {
   "use cache";
   cacheTag("github");
-  const result = await attempt(() => fetchLiveActivity({ ...liveClient(), now: new Date() }));
+  const result = await attempt("activity", () => fetchLiveActivity({ ...liveClient(), now: new Date() }));
   if (result.ok) cacheLife(LIVE_LIFETIME);
   else cacheLife("seconds");
   return result;
@@ -55,7 +65,7 @@ async function getLiveActivity(): Promise<Cached<Activity>> {
 async function getLiveProfile(): Promise<Cached<Profile>> {
   "use cache";
   cacheTag("github");
-  const result = await attempt(() => {
+  const result = await attempt("profile", () => {
     const { client, username } = liveClient();
     return fetchLiveProfile({ client, username, now: new Date() });
   });
