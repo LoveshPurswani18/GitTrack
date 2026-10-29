@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { requireSession } from "@/lib/auth/session";
 import { getConfig } from "@/lib/config";
 import type { Activity } from "@/types/activity";
 import { getActivity } from "@/lib/github";
@@ -135,6 +136,7 @@ function RepoList({ activity }: { activity: Activity }) {
 
 async function LiveCheck() {
   await connection(); // request time only
+  await requireSession(); // every data read checks the pass itself
   const config = getConfig();
   const activity = await getActivity();
   const now = new Date(activity.fetchedAt);
