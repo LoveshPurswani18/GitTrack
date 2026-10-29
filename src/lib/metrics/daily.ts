@@ -1,10 +1,10 @@
-import type { Commit } from "@/types/activity";
+import type { CommitStamp } from "@/types/activity";
 import { dayRange, toLocalDay } from "./days";
 import type { DayBounds } from "./range";
 
 /** Commits per local day across the bounds, zero-filled and in date order. */
 export function dailyCounts(
-  commits: Commit[],
+  commits: CommitStamp[],
   timeZone: string,
   bounds: DayBounds,
 ): Map<string, number> {
@@ -18,6 +18,6 @@ export function dailyCounts(
 }
 
 /** Local days with at least one commit. */
-export function activeDays(commits: Commit[], timeZone: string): Set<string> {
+export function activeDays(commits: CommitStamp[], timeZone: string): Set<string> {
   return new Set(commits.map((c) => toLocalDay(c.authoredAt, timeZone)));
 }

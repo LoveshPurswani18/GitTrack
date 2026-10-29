@@ -1,4 +1,4 @@
-import type { Activity } from "./activity";
+import type { ActivityView } from "./activity";
 
 /** A GitHub failure as plain data, safe to hand to client components. Never holds the token. */
 export type DashboardError = {
@@ -12,6 +12,6 @@ export type DashboardError = {
  * failed (stale), or nothing but the reason (error).
  */
 export type DashboardResult =
-  | { status: "ok"; activity: Activity }
-  | { status: "stale"; activity: Activity; error: DashboardError }
+  | { status: "ok"; activity: ActivityView }
+  | { status: "stale"; activity: ActivityView; error: DashboardError }
   | { status: "error"; error: DashboardError };

@@ -31,7 +31,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
       <Avatar
         src={profile.avatarUrl}
         name={name}
-        className="h-16 w-16 sm:h-24 sm:w-24"
+        className="size-16 sm:size-24"
         initialClassName="text-title"
       />
       <div className="flex min-w-0 flex-1 basis-64 flex-col gap-3">

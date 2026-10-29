@@ -122,7 +122,23 @@ export function createGitHubClient(options: ClientOptions): GitHubClient {
     return report(label, started, error, res.status, message ? `${error.message} - ${message}` : undefined);
   }
 
-  const resolve = (path: string) => (path.startsWith("http") ? path : `${API_URL}${path}`);
+  // The token goes out with every request, so every URL, whether a path from the caller or the
+  // `next` link in a response, must end up on GitHub's API origin before it is followed. The check
+  // runs on the final URL, so a "path" such as `.evil.example/x` (which would glue onto the host)
+  // is caught too.
+  const resolve = (path: string) => {
+    const url = path.startsWith("http") ? path : `${API_URL}${path}`;
+    let origin: string | null;
+    try {
+      origin = new URL(url).origin;
+    } catch {
+      origin = null;
+    }
+    if (origin !== API_URL) {
+      throw new GitHubError("network", "GitHub returned an unexpected link");
+    }
+    return url;
+  };
 
   return {
     log,
@@ -185,7 +201,8 @@ export function createGitHubClient(options: ClientOptions): GitHubClient {
           throw report(label, started, new GitHubError("network", "GitHub returned an unexpected list"), res.status);
         }
         items.push(...(body as T[]));
-        url = NEXT_LINK.exec(res.headers.get("link") ?? "")?.[1] ?? null;
+        const next = NEXT_LINK.exec(res.headers.get("link") ?? "")?.[1];
+        url = next ? resolve(next) : null;
       }
       return items;
     },

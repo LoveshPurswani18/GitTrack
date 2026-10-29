@@ -38,3 +38,16 @@ export type Activity = {
   // merges). Debug only: the `onDefault` commits plus these equal what GitHub counts.
   supersededCommits: Commit[];
 };
+
+/**
+ * What the browser gets: only the fields the dashboard reads. No shas, branch flags, cross-check
+ * counts, window bounds or token-scope hints. Built on the server by `toActivityView`.
+ */
+export type RepoSummary = Pick<Repo, "nameWithOwner" | "url" | "isWork">;
+export type CommitStamp = Pick<Commit, "repo" | "authoredAt">;
+export type ActivityView = {
+  fetchedAt: string;
+  repos: RepoSummary[];
+  commits: CommitStamp[];
+  pullRequests: PullRequest[];
+};

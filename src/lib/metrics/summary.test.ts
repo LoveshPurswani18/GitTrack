@@ -60,3 +60,27 @@ describe("thisWeekVsLast", () => {
     });
   });
 });
+
+describe("day and week edges in the selected timezone", () => {
+  it("splits the day at local midnight, not at UTC midnight", () => {
+    const now = new Date("2026-10-14T20:00:00Z"); // 15 Oct in IST
+    const commits = [at("2026-10-14T18:29:59Z"), at("2026-10-14T18:30:00Z")]; // 14 Oct and 15 Oct IST
+    expect(commitsToday(commits, "Asia/Kolkata", now)).toBe(1);
+    expect(totalInRange(commits, "Asia/Kolkata", { start: "2026-10-14", end: "2026-10-14" })).toBe(1);
+  });
+
+  it("a Monday after midnight in IST is still Sunday in UTC, so the week differs", () => {
+    const now = new Date("2026-10-11T19:00:00Z"); // Mon 12 Oct 00:30 IST, Sun 11 Oct UTC
+    const commits = [at("2026-10-06T10:00:00Z"), at("2026-10-11T18:45:00Z")]; // Tue, and Mon 00:15 IST
+    expect(thisWeekVsLast(commits, "Asia/Kolkata", now).thisWeek).toBe(1);
+    expect(thisWeekVsLast(commits, "UTC", now).thisWeek).toBe(2);
+  });
+
+  it("on a Sunday, this week spans the whole Monday to Sunday", () => {
+    const now = new Date("2026-10-18T12:00:00Z"); // Sunday
+    const commits = [at("2026-10-12T10:00:00Z"), at("2026-10-18T10:00:00Z"), at("2026-10-05T10:00:00Z")];
+    const week = thisWeekVsLast(commits, "UTC", now);
+    expect(week.thisWeek).toBe(2);
+    expect(week.lastWeek).toBe(1);
+  });
+});

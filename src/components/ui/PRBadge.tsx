@@ -29,7 +29,7 @@ export function PRBadge({
         className,
       )}
     >
-      {dot && <span aria-hidden="true" className={`h-2 w-2 rounded-full ${dot}`} />}
+      {dot && <span aria-hidden="true" className={`size-2 rounded-full ${dot}`} />}
       {count !== undefined && <span className="text-metric-sm text-text-primary">{count}</span>}
       {label}
     </span>

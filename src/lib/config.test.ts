@@ -13,9 +13,10 @@ describe("parseConfig", () => {
     expect(parseConfig({}).dataSource).toBe("fixtures");
   });
 
-  it("falls back to fixtures for any value other than live", () => {
-    expect(parseConfig({ GITHUB_DATA: "LIVE" }).dataSource).toBe("fixtures");
-    expect(parseConfig({ GITHUB_DATA: "production" }).dataSource).toBe("fixtures");
+  it("refuses a GITHUB_DATA value that is neither live nor fixtures, rather than showing sample data", () => {
+    expect(() => parseConfig({ GITHUB_DATA: "LIVE" })).toThrow('GITHUB_DATA must be "live" or "fixtures"');
+    expect(() => parseConfig({ GITHUB_DATA: "production" })).toThrow('GITHUB_DATA must be "live" or "fixtures"');
+    expect(parseConfig({ GITHUB_DATA: "  " }).dataSource).toBe("fixtures");
   });
 
   it("does not require a token in fixtures mode", () => {

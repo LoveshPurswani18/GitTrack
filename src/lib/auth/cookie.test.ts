@@ -29,6 +29,11 @@ describe("session cookie", () => {
     expect(verifySession(SECRET, `${version}.${expiry}.${signature}x`, NOW)).toBe(false);
   });
 
+  it("rejects an expiry with leading zeros, even though it has the same number", () => {
+    const [version, expiry, signature] = signSession(SECRET, NOW).split(".");
+    expect(verifySession(SECRET, `${version}.0${expiry}.${signature}`, NOW + 1000)).toBe(false);
+  });
+
   it("rejects missing, empty and malformed values without throwing", () => {
     for (const bad of [undefined, "", ".", "v1", "v1.123", "v1..sig", "v2.1.sig", "v1.abc.sig", "v1.1.2.3", "😀"]) {
       expect(verifySession(SECRET, bad, NOW)).toBe(false);

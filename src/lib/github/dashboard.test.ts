@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { activity } from "@/test/factories";
 import type { Activity } from "@/types/activity";
-import { fixtureDashboard, resolveDashboard, type SnapshotStore } from "./dashboard";
+import { fixtureDashboard, resolveDashboard, toActivityView, toDashboardError, type SnapshotStore } from "./dashboard";
 import { GitHubError } from "./errors";
 
 const NOW = new Date("2026-10-20T10:00:00Z");
@@ -17,12 +17,38 @@ function memory(initial: Activity | null = null): SnapshotStore & { saved: Activ
   return store;
 }
 
+describe("toDashboardError", () => {
+  it("never passes GitHub's own text, or a repo name, to the browser", () => {
+    const error = new GitHubError("token", "GitHub refused access (403): Resource not accessible by org/private-repo");
+    expect(toDashboardError(error)).toEqual({ kind: "token", message: "GitHub rejected the token", resetAt: undefined });
+    expect(JSON.stringify(toDashboardError(error))).not.toContain("private-repo");
+  });
+});
+
+describe("toActivityView", () => {
+  it("keeps only what the dashboard reads", () => {
+    const full = activity();
+    const view = toActivityView(full);
+    expect(Object.keys(view).sort()).toEqual(["commits", "fetchedAt", "pullRequests", "repos"]);
+    expect(view.commits).toHaveLength(full.commits.length);
+    for (const commit of view.commits) expect(Object.keys(commit).sort()).toEqual(["authoredAt", "repo"]);
+    for (const repo of view.repos) expect(Object.keys(repo).sort()).toEqual(["isWork", "nameWithOwner", "url"]);
+  });
+
+  it("leaves no sha, branch flag, cross-check, window bound or username in the payload", () => {
+    const json = JSON.stringify(toActivityView(activity()));
+    for (const field of ["sha", "onDefault", "crossCheck", "supersededCommits", "windowStart", "windowEnd", "restrictedCount", "defaultBranch", "isPrivate", "username"]) {
+      expect(json).not.toContain(`"${field}"`);
+    }
+  });
+});
+
 describe("resolveDashboard", () => {
   it("returns ok and remembers the data", async () => {
     const fresh = activity();
     const store = memory();
     const result = await resolveDashboard(async () => fresh, store);
-    expect(result).toEqual({ status: "ok", activity: fresh });
+    expect(result).toEqual({ status: "ok", activity: toActivityView(fresh) });
     expect(store.saved).toBe(fresh);
   });
 
@@ -35,7 +61,7 @@ describe("resolveDashboard", () => {
     }, store);
     expect(result).toEqual({
       status: "stale",
-      activity: cached,
+      activity: toActivityView(cached),
       error: { kind: "rate_limit", message: "GitHub rate limit reached", resetAt },
     });
   });

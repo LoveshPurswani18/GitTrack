@@ -1,5 +1,5 @@
-import type { Activity } from "@/types/activity";
 import { toLocalDay } from "./days";
+import type { Scoped } from "./filter";
 import { type DayBounds, inBounds } from "./range";
 
 export type ProjectCount = { repo: string; url: string; isWork: boolean; count: number };
@@ -9,7 +9,7 @@ export type ProjectCount = { repo: string; url: string; isWork: boolean; count: 
  * `activity.repos` are skipped, matching filterByScope.
  */
 export function commitsByRepo(
-  activity: Activity,
+  activity: Pick<Scoped, "repos" | "commits">,
   timeZone: string,
   bounds: DayBounds,
 ): ProjectCount[] {

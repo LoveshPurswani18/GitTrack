@@ -73,7 +73,7 @@ Every metric follows GitHub's own counting rules, so in IST the numbers can be c
 
 | Term | Definition |
 | --- | --- |
-| Commit | A commit I authored (email linked to my GitHub account) on any branch of a repo I can see, counted once per sha; fork commits don't count. Commits inside my PRs count too, so squash- and rebase-merged work with deleted branches keeps its real days |
+| Commit | A commit I authored (email linked to my GitHub account) on any branch of a repo I can see, counted once per sha; fork commits don't count. Only the commit's author counts: a commit someone else authored with me named as a co-author is not mine. Commits inside my PRs count too, so squash- and rebase-merged work with deleted branches keeps its real days |
 | Active day | A day with at least one commit; PRs alone don't make a day active |
 | Current streak | Consecutive active days ending today or yesterday, in the selected timezone |
 | Longest streak | Longest run of consecutive active days in the fetched data (up to 12 months) |

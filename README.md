@@ -1,30 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitTrack
 
-## Getting Started
+A personal dashboard for my GitHub commits and pull requests. It shows how much I ship, how
+consistently, and where: streaks, a year-long activity heatmap, commits by project and the state of
+my pull requests, all grouped into days in the timezone I choose.
 
-First, run the development server:
+It is a single-user app with no database. The server fetches the data from GitHub and caches it for
+15 minutes; the browser computes every number, so changing a filter never makes a network request.
 
-```bash
-pnpm dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Commit counting that matches how I work.** A commit counts if I authored it on any branch of a
+  repo I can see (forks excluded), once per commit, so work on feature branches is not hidden. An
+  active day has at least one commit; pull requests alone do not count.
+- **Stat cards:** commits today, this week against last week, current and longest streak, and the
+  total for the selected range.
+- **Activity heatmap:** Monday-first weeks for Today, 1 week, 1 month, 6 months and 1 year, with five
+  intensity levels, a tooltip on every day and keyboard navigation.
+- **Commits by project:** every repo with commits in the range, with counts and share bars.
+- **Pull requests:** opened, open now and merged for the range, plus a recent list with status badges.
+- **Filters:** personal, work or all repos, and a searchable timezone picker. The selection lives in
+  the URL, so a view can be bookmarked.
+- **Refresh and resilience:** a manual refresh, an "updated N min ago" label, and clear states for
+  loading, no data, rate limits and token problems. The last good data stays on screen when a refresh
+  fails.
+- **Profile page** with my GitHub details.
+- **Private by default:** nothing is shown without an access key, and the session can be locked from
+  the header.
+- **Light and dark themes,** a skip link and full keyboard support.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js (App Router, Cache Components) and React
+- TypeScript in strict mode
+- Tailwind CSS v4 with a small design-token system, lucide-react icons, Geist and Geist Mono fonts
+- GitHub GraphQL and REST APIs, called only from server code
+- Vitest for the unit tests (metrics, data layer, access gate)
+- pnpm, deployed on Vercel
 
-## Learn More
+## Developer information
 
-To learn more about Next.js, take a look at the following resources:
+Built by Lovesh Purswani ([@LoveshPurswani18](https://github.com/LoveshPurswani18)).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Day-to-day commands: `pnpm dev`, `pnpm test`, `pnpm lint` and `pnpm build`. Development runs on
+built-in sample data, so no GitHub account is needed to work on the interface.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The metric logic is pure and unit-tested, including the timezone edge cases. Anything that touches
+GitHub or the access gate lives on the server only.
 
-## Deploy on Vercel
+More detail is in the project docs:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [docs/PRD.md](docs/PRD.md): scope, metric definitions, success criteria
+- [docs/DESIGN.md](docs/DESIGN.md): design tokens, components, layouts and states
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): data flow and folder structure
+- [docs/TASKS.md](docs/TASKS.md): the build backlog
+- [spike/RESULTS.md](spike/RESULTS.md): what the validation spike proved about the GitHub API

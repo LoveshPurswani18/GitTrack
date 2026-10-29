@@ -23,6 +23,7 @@ export function verifySession(secret: string, value: string | undefined, now: nu
   const [version, expiry, given, ...rest] = value.split(".");
   if (version !== VERSION || rest.length > 0 || !expiry || !given || !/^\d{1,12}$/.test(expiry)) return false;
   const expiresAt = Number(expiry);
+  if (String(expiresAt) !== expiry) return false; // one spelling per expiry: no leading zeros
 
   const expected = Buffer.from(signature(secret, expiresAt));
   const actual = Buffer.from(given);

@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "GitTrack", template: "%s · GitTrack" },
   description: "Personal dashboard for GitHub commits and pull requests.",
+  robots: { index: false, follow: false },
 };
 
 // Applies the saved theme before first paint to avoid a flash.

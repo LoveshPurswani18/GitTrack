@@ -2,14 +2,51 @@ import "server-only";
 
 import { requireSession } from "@/lib/auth/session";
 import { getConfig, type FixtureState } from "@/lib/config";
-import type { Activity } from "@/types/activity";
-import type { DashboardResult } from "@/types/dashboard";
-import { GitHubError, serializeError } from "./errors";
+import type { Activity, ActivityView } from "@/types/activity";
+import type { DashboardError, DashboardResult } from "@/types/dashboard";
+import { GitHubError } from "./errors";
 import { loadFixtureActivity } from "./fixtures";
 import { getActivity } from "./index";
 
 /** Where the last successful Activity is kept, so a failed refresh can still show it. */
 export type SnapshotStore = { get(): Activity | null; set(activity: Activity): void };
+
+const CLIENT_MESSAGES: Record<DashboardError["kind"], string> = {
+  token: "GitHub rejected the token",
+  rate_limit: "GitHub rate limit reached",
+  network: "Could not reach GitHub",
+};
+
+/**
+ * The error as the browser sees it: the kind, the reset time and a fixed message. GitHub's own
+ * text can name a private repo, so it stays in the server log.
+ */
+export function toDashboardError(error: GitHubError): DashboardError {
+  return { kind: error.kind, message: CLIENT_MESSAGES[error.kind], resetAt: error.resetAt };
+}
+
+/**
+ * Cuts an Activity down to what the dashboard shows before it is sent to the browser. Everything
+ * else (shas, branch flags, cross-check counts, window bounds, token-scope hints, the username)
+ * stays on the server.
+ */
+export function toActivityView(activity: Activity): ActivityView {
+  return {
+    fetchedAt: activity.fetchedAt,
+    repos: activity.repos.map(({ nameWithOwner, url, isWork }) => ({ nameWithOwner, url, isWork })),
+    commits: activity.commits.map(({ repo, authoredAt }) => ({ repo, authoredAt })),
+    pullRequests: activity.pullRequests.map((pr) => ({
+      repo: pr.repo,
+      number: pr.number,
+      title: pr.title,
+      url: pr.url,
+      state: pr.state,
+      createdAt: pr.createdAt,
+      mergedAt: pr.mergedAt,
+      closedAt: pr.closedAt,
+    })),
+  };
+}
 
 /**
  * Runs `load` and turns the outcome into something the page can render. A GitHub failure becomes
@@ -23,13 +60,13 @@ export async function resolveDashboard(
   try {
     const activity = await load();
     store.set(activity);
-    return { status: "ok", activity };
+    return { status: "ok", activity: toActivityView(activity) };
   } catch (error) {
     if (!(error instanceof GitHubError)) throw error;
     const cached = store.get();
-    const failure = serializeError(error);
+    const failure = toDashboardError(error);
     return cached
-      ? { status: "stale", activity: cached, error: failure }
+      ? { status: "stale", activity: toActivityView(cached), error: failure }
       : { status: "error", error: failure };
   }
 }

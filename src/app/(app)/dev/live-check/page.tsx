@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { requireSession } from "@/lib/auth/session";
 import { getConfig } from "@/lib/config";
 import type { Activity } from "@/types/activity";
 import { getActivity } from "@/lib/github";
@@ -28,7 +29,7 @@ const ZONES = ["Asia/Kolkata", "UTC"] as const;
 export default function LiveCheckPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <main className="mx-auto w-full max-w-[1024px] px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
+    <main className="mx-auto w-full max-w-5xl px-4 pt-6 pb-12 sm:px-6 sm:pt-10">
       <h1 className="text-title">Live check</h1>
       <p className="text-body text-text-secondary">
         Temporary page for comparing the data layer with your GitHub profile.
@@ -135,6 +136,7 @@ function RepoList({ activity }: { activity: Activity }) {
 
 async function LiveCheck() {
   await connection(); // request time only
+  await requireSession(); // every data read checks the pass itself
   const config = getConfig();
   const activity = await getActivity();
   const now = new Date(activity.fetchedAt);

@@ -14,7 +14,7 @@ const LEVEL_BG: Record<Level, string> = {
 };
 
 const NAV_KEYS = new Set<string>(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"]);
-const CELL_SIZE = "h-[10px] w-[10px] sm:h-3 sm:w-3";
+const CELL_SIZE = "size-2.5 sm:size-3";
 
 type Weeks = (Cell | null)[][];
 type Tip = { text: string; x: number; y: number };
@@ -81,9 +81,9 @@ export function Heatmap({
   return (
     <div>
       <div ref={scroller} className="overflow-x-auto py-1" onScroll={() => setTip(null)}>
-        <div role="grid" aria-label={ariaLabel} className="flex w-max flex-col gap-[2px] sm:gap-[3px]">
+        <div role="grid" aria-label={ariaLabel} className="flex w-max flex-col gap-0.5 sm:gap-0.75">
           {Array.from({ length: 7 }, (_, d) => (
-            <div key={d} role="row" className="flex gap-[2px] sm:gap-[3px]">
+            <div key={d} role="row" className="flex gap-0.5 sm:gap-0.75">
               {weeks.map((week, w) => {
                 const cell = week[d];
                 if (!cell) {
@@ -105,7 +105,7 @@ export function Heatmap({
                     onBlur={() => setTip(null)}
                     onMouseEnter={(e) => showTip(e.currentTarget, cell)}
                     onMouseLeave={() => setTip(null)}
-                    className={`${CELL_SIZE} rounded-[2px] ${LEVEL_BG[cell.level]} ${
+                    className={`${CELL_SIZE} rounded-xs ${LEVEL_BG[cell.level]} ${
                       cell.day === today ? "outline-[1.5px] outline-offset-1 outline-text-primary" : ""
                     }`}
                   />
@@ -133,7 +133,7 @@ export function HeatmapLegend() {
     <div className="text-caption flex items-center gap-1 text-text-muted">
       <span>Less</span>
       {([0, 1, 2, 3, 4] as const).map((level) => (
-        <span key={level} aria-hidden="true" className={`h-[10px] w-[10px] rounded-[2px] ${LEVEL_BG[level]}`} />
+        <span key={level} aria-hidden="true" className={`size-2.5 rounded-xs ${LEVEL_BG[level]}`} />
       ))}
       <span>More</span>
     </div>

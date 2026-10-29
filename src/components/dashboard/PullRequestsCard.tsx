@@ -3,7 +3,7 @@ import { WorkTag } from "@/components/ui/WorkTag";
 import { formatDayMonth, repoName } from "@/lib/format";
 import { toLocalDay } from "@/lib/metrics/days";
 import type { PrStats } from "@/lib/metrics/prs";
-import type { PullRequest, Repo } from "@/types/activity";
+import type { PullRequest, RepoSummary } from "@/types/activity";
 
 export function PullRequestsCard({
   stats,
@@ -13,7 +13,7 @@ export function PullRequestsCard({
 }: {
   stats: PrStats;
   recent: PullRequest[];
-  repos: Repo[];
+  repos: RepoSummary[];
   tz: string;
 }) {
   const workRepos = new Set(repos.filter((r) => r.isWork).map((r) => r.nameWithOwner));

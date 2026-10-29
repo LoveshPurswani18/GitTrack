@@ -17,10 +17,14 @@ export function LockButton() {
     setPending(true);
     try {
       await lock();
-    } finally {
-      // replace(), not push: the signed-in page leaves the history, so Back cannot return to it.
-      window.location.replace(`${window.location.origin}/unlock`);
+    } catch {
+      // The pass was not deleted, so do not show the unlock screen as if it were: stay and let
+      // the user try again.
+      setPending(false);
+      return;
     }
+    // replace(), not push: the signed-in page leaves the history, so Back cannot return to it.
+    window.location.replace(`${window.location.origin}/unlock`);
   }
 
   return (
@@ -29,7 +33,7 @@ export function LockButton() {
       onClick={onClick}
       disabled={pending}
       aria-label="Lock GitTrack"
-      className="text-label inline-flex h-11 w-11 items-center justify-center rounded-sm text-text-secondary hover:bg-surface-hover disabled:opacity-50 sm:h-8 sm:w-auto sm:gap-2 sm:border sm:border-control-border sm:bg-bg sm:px-3 sm:text-text-primary"
+      className="text-label inline-flex size-11 items-center justify-center rounded-sm text-text-secondary hover:bg-surface-hover disabled:opacity-50 sm:h-8 sm:w-auto sm:gap-2 sm:border sm:border-control-border sm:bg-bg sm:px-3 sm:text-text-primary"
     >
       <Lock size={16} strokeWidth={1.5} aria-hidden="true" className="sm:text-text-muted" />
       <span className="hidden sm:inline">Lock</span>
