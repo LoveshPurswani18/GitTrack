@@ -15,8 +15,12 @@ import {
 import { loadFixtureActivity, loadFixtureProfile } from "./fixtures";
 import { fetchLiveActivity, fetchLiveProfile } from "./live";
 
-/** Live data is fresh for 15 minutes; after that it is served stale while it refreshes. */
-const LIVE_LIFETIME = { stale: 300, revalidate: 900, expire: 3600 };
+/**
+ * Live data is fresh for 15 minutes; after that it is served stale while it refreshes in the
+ * background, for up to a day. A year of live data takes about 40 s to fetch, so a visit should
+ * almost never wait for it: only a visit after a full day without any, or the first after a deploy.
+ */
+const LIVE_LIFETIME = { stale: 300, revalidate: 900, expire: 86400 };
 
 /**
  * What the cached live functions return. A failure is returned as plain data, not thrown, so it
@@ -29,7 +33,9 @@ async function attempt<T>(name: string, run: () => Promise<T>): Promise<Cached<T
   const seconds = () => ((Date.now() - started) / 1000).toFixed(1);
   try {
     const data = await run();
-    console.info(`[github] live ${name} ok in ${seconds()}s`);
+    // The size shows whether an entry could be too big for the host's cache; no names or values.
+    const kilobytes = Math.round(Buffer.byteLength(JSON.stringify(data)) / 1024);
+    console.info(`[github] live ${name} ok in ${seconds()}s, ${kilobytes} KB`);
     return { ok: true, data };
   } catch (error) {
     if (error instanceof GitHubError) {
@@ -53,8 +59,11 @@ function liveClient() {
   return { client: createGitHubClient({ token: token! }), username: username!, workOrg: workOrg! };
 }
 
+// "use cache: remote", not plain "use cache": the plain one keeps entries in the memory of one
+// serverless instance, which is usually gone before the next request, so every reload would wait
+// for the full GitHub fetch. The remote cache is shared by all instances (docs/ARCHITECTURE.md §7).
 async function getLiveActivity(): Promise<Cached<Activity>> {
-  "use cache";
+  "use cache: remote";
   cacheTag("github");
   const result = await attempt("activity", () => fetchLiveActivity({ ...liveClient(), now: new Date() }));
   if (result.ok) cacheLife(LIVE_LIFETIME);
@@ -63,7 +72,7 @@ async function getLiveActivity(): Promise<Cached<Activity>> {
 }
 
 async function getLiveProfile(): Promise<Cached<Profile>> {
-  "use cache";
+  "use cache: remote"; // same reason as getLiveActivity
   cacheTag("github");
   const result = await attempt("profile", () => {
     const { client, username } = liveClient();
