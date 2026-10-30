@@ -172,6 +172,7 @@ Severity, for `docs/temp/audit/result.md`: **High** = the token or work data is 
 - [ ] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds
 - [ ] **(me)** Production build log shows pnpm install (pnpm 12.x), Install Command empty, Node 24.x
 - [ ] **(me)** Launch checklist (Rebuild Guide step 8): unlock works on production; 30 random IST days + both streaks match my profile; cached load under 2 s; mobile check on my phone
+- [ ] **(me)** Cache check after the `fix/remote-cache` deploy (found on the first production day: plain `use cache` missed on every request): reload and Profile to Dashboard are fast, and Vercel Logs show about one `[github] live activity ok` line per 15 minutes, not one per request
 - [ ] **(me)** Share the URL only after the gate is verified (3.4, 3.5)
 - [ ] Remove `src/app/(app)/dev/live-check` (temporary live-data cross-check page; it returns 404 in production, so it can stay while the core features are built)
 

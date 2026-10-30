@@ -208,18 +208,25 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
 
 ## 7. Caching and refresh
 
-- The live path of `getActivity()` and `getProfile()` is wrapped in `"use cache"`
-  (in-memory handler) with `cacheTag("github")` and
-  `cacheLife({ stale: 300, revalidate: 900, expire: 3600 })`: fresh for 15 minutes,
-  then served stale while it refreshes. The fixtures path is **not** cached, because
-  the fixture state comes from an env var and its dates are relative to now.
+- The live path of `getActivity()` and `getProfile()` is wrapped in `"use cache: remote"`
+  with `cacheTag("github")` and `cacheLife({ stale: 300, revalidate: 900, expire: 86400 })`:
+  fresh for 15 minutes, then served stale (and refreshed in the background) for up to a day, so
+  a visit almost never waits for the live fetch (about 27 s measured on production, up to 41.6 s
+  with a many-branch repo locally). The fixtures path is **not**
+  cached, because the fixture state comes from an env var and its dates are relative to now.
 - **Failures are not cached for 15 minutes.** The cached function returns
   `{ ok: true, data }` or `{ ok: false, error }` as plain data and calls
   `cacheLife("seconds")` on failure, so a fixed token or a passed rate limit
   recovers on the next request. The outer function rethrows a real `GitHubError`.
-- The in-memory handler may not persist between requests on serverless hosting
-  (Vercel). If the launch check (cached load under 2 s) fails there, switch the
-  directive to `"use cache: remote"`.
+- **Why remote, not plain `"use cache"`.** The plain directive keeps entries in the memory of one
+  server instance. On Vercel (serverless) that memory is mostly gone before the next request, so
+  the first production day (29 to 30 Oct) missed the cache on every reload (Vercel logs showed a
+  27 s fetch on each of two requests 45 s apart) and on every Profile to Dashboard navigation. `"use cache: remote"` stores the entry in a cache shared by all
+  instances, which the host provides; no configuration is needed. Entries do not survive a
+  deploy (the key includes the build), so the first load after each deploy is slow by design.
+- Each live fetch logs its size (`[github] live activity ok in 27.1s, 812 KB`). If a host ever
+  limits entry size, that line shows it; the fallback is to cache only the trimmed
+  `ActivityView` shape.
 - **Refresh** is a server action in `src/app/actions.ts` that calls `updateTag("github")`
   (immediate expiry, so the next render refetches instead of serving stale data first), then
   `router.refresh()` runs on the client. While it runs, the current data stays on screen and the
@@ -233,12 +240,13 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
 - **A failed refresh keeps the last good data.** `getDashboardData()` in
   `src/lib/github/dashboard.ts` wraps `getActivity()` and returns a `DashboardResult`
   (`src/types/dashboard.ts`): `ok` (fresh data), `stale` (the last good Activity plus the error)
-  or `error` (nothing cached). The last good Activity is kept in server memory, like the cache
-  itself, so after a restart followed by a failure the user sees "No data to show".
+  or `error` (nothing cached). The last good Activity is kept in the memory of the server instance
+  (unlike the shared cache), so on a fresh instance followed by a failure the user sees "No data to
+  show".
 - Target: a cached page load under 2 s. An uncached year took 5.95 s in the
   spike (default branch only), so caching is required. The all-branch fetch makes
-  more requests (section 6), so its uncached time has to be measured on the
-  live-check page and may be higher.
+  more requests (section 6) and is slower: measured uncached, about 27 s on production (30 Oct)
+  and 41.6 s on the live-check page with the many-branch repo (29 Oct).
 
 ## 8. Errors
 
