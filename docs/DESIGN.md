@@ -173,7 +173,7 @@ Build these in `src/components/ui/` with these names, then assemble pages from t
 - Options: `label` style, 12px horizontal padding, 4px radius, `text-secondary`; hover `surface-hover`.
 - **Selected:** `accent-subtle` fill and `accent-text` label. **Colour change only**: no underline, border or shadow.
 - Markup: `role="group"` + `aria-label` on the wrapper; each option a `<button aria-pressed>`.
-- Range: `Today · 1W · 1M · 6M · 1Y` (default 6M). Repos: `All · Personal · Work` (default All).
+- Range: `Today · 1W · 1M · 6M · 1Y` (default Today). Repos: `All · Personal · Work` (default All).
 - On mobile both controls are full width with equal-width options. Never wrap.
 - Persist the selection in the URL: `?range=6m&repos=work&tz=Asia/Kolkata`.
 
