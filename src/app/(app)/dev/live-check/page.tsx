@@ -1,7 +1,7 @@
-// TEMPORARY dev page for cross-checking the live data layer: counts, per-day and per-month
-// totals against GitHub's own numbers, and the repo list (names at runtime only). No PR titles
-// or commit messages. Returns 404 in production. Kept while the core features are built;
-// remove it before launch (docs/TASKS.md, 3.6).
+// Dev-only page for cross-checking the live data layer: counts, per-day and per-month totals
+// against GitHub's own numbers, and the repo list (names at runtime only). No PR titles or
+// commit messages. Returns 404 in production. Kept on purpose for live accuracy checks such as
+// the 30 random IST days (docs/TASKS.md, 3.6).
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
