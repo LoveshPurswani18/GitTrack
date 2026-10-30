@@ -224,6 +224,8 @@ All GitHub code lives in `src/lib/github/`, and each file starts with
   27 s fetch on each of two requests 45 s apart) and on every Profile to Dashboard navigation. `"use cache: remote"` stores the entry in a cache shared by all
   instances, which the host provides; no configuration is needed. Entries do not survive a
   deploy (the key includes the build), so the first load after each deploy is slow by design.
+  Verified on production on 30 Oct: after the fix, a reload serves cached data and a new fetch runs
+  only after 15 minutes or on Refresh (Vercel Logs).
 - Each live fetch logs its size (`[github] live activity ok in 27.1s, 812 KB`). If a host ever
   limits entry size, that line shows it; the fallback is to cache only the trimmed
   `ActivityView` shape.
