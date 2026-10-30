@@ -4,7 +4,7 @@ import type { Range } from "@/lib/metrics/range";
 /** The three dashboard controls, kept in the URL as ?range=6m&repos=all&tz=Asia%2FKolkata. */
 export type Controls = { range: Range; scope: Scope; tz: string };
 
-export const DEFAULT_RANGE: Range = "6m";
+export const DEFAULT_RANGE: Range = "today";
 export const DEFAULT_SCOPE: Scope = "all";
 
 export const RANGE_OPTIONS: { value: Range; label: string }[] = [
@@ -45,7 +45,7 @@ export function isValidTimeZone(timeZone: string): boolean {
 
 /**
  * Reads the controls from a query string. Anything missing or invalid falls back to the
- * default (6m, all repos, the browser's zone), so a hand-edited URL never breaks the page.
+ * default (today, all repos, the browser's zone), so a hand-edited URL never breaks the page.
  */
 export function parseControls(search: string, browserZone: string): Controls {
   const params = new URLSearchParams(search);

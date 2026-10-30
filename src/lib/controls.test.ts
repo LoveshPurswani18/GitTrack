@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { controlsToSearch, isValidTimeZone, parseControls, rangeLabel } from "./controls";
 
 describe("parseControls", () => {
-  it("uses the defaults (6m, all, browser zone) for an empty query", () => {
+  it("uses the defaults (today, all, browser zone) for an empty query", () => {
     expect(parseControls("", "Asia/Kolkata")).toEqual({
-      range: "6m",
+      range: "today",
       scope: "all",
       tz: "Asia/Kolkata",
     });
@@ -20,7 +20,7 @@ describe("parseControls", () => {
 
   it("falls back to the default for an invalid range or repos value", () => {
     const parsed = parseControls("?range=5y&repos=everything", "UTC");
-    expect(parsed.range).toBe("6m");
+    expect(parsed.range).toBe("today");
     expect(parsed.scope).toBe("all");
   });
 

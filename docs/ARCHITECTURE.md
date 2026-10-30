@@ -329,7 +329,7 @@ lib/controls.ts       parse/serialise the URL controls, range labels (pure, test
 (`?range=1m&repos=work&tz=Asia%2FKolkata`) and are updated with
 `history.replaceState` in the change handler, so there is no server round trip and links are
 shareable. The state is the `Scope` type in code; the URL parameter is `repos`
-(DESIGN.md §6.2). Defaults: `range=6m`, `repos=all`, and tz = URL value, then the
+(DESIGN.md §6.2). Defaults: `range=today`, `repos=all`, and tz = URL value, then the
 browser's zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`). Missing or invalid values
 fall back to the defaults, and the URL is left alone until a control changes.
 The tz and the clock are only known in the browser, so `useClientEnvironment()`
