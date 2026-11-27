@@ -12,6 +12,10 @@ release kept a changelog at the time.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [2.0.1] - 2026-11-27
+
 ### Security
 
 - Upgraded Next.js from 16.4.1 to 16.4.6, which fixes seven moderate-severity advisories:
