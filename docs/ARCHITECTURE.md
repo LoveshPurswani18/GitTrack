@@ -347,7 +347,6 @@ and saves it to `localStorage` (DESIGN.md §9). A tiny inline script in
 ```
 .
 ├── CLAUDE.md
-├── .coderabbit.yaml           # lets CodeRabbit review PRs that target v2
 ├── next.config.ts             # security headers, no X-Powered-By (section 15)
 ├── docs/
 │   ├── PRD.md  DESIGN.md  ARCHITECTURE.md  TASKS.md

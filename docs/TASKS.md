@@ -1,8 +1,8 @@
 # GitTrack v2 — Tasks
 
-The MVP backlog, in build order. One task = one `feat/<branch>` off `v2` = one PR
-into `v2`. Work top to bottom; a task starts only when the ones it depends on
-are merged.
+The MVP backlog, in build order. One task = one `feat/<branch>` off `main` = one PR
+into `main` (the tasks below were built off the retired `v2` branch). Work top to
+bottom; a task starts only when the ones it depends on are merged.
 
 How to run a task (CLAUDE.md, "Workflow"): plan mode → I approve the plan →
 build on fixtures → lint, test, build → Playwright check for UI → coderabbit-review
@@ -167,7 +167,7 @@ Severity, for `docs/temp/audit/result.md`: **High** = the token or work data is 
 - **Done when:** every box above is ticked or has an accepted-risk note in `docs/temp/audit/result.md`, the access gate verdict is recorded, and nothing found is rated high.
 
 ### 3.6 Deploy · merge `v2` → `main`
-- [x] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which control Vercel deploys while `main` still holds the old Vite app (decided 30 Oct: leave it as it is, so `v2` previews stay on and `feat/*` and `chore/*` stay off)
+- [x] **(me)** Remove or revisit the `v2` and `feat/*` entries in `vercel.json` (`git.deploymentEnabled`), which control Vercel deploys while `main` still holds the old Vite app (decided 30 Oct: leave it as it is, so `v2` previews stay on and `feat/*` and `chore/*` stay off) (retired 27 Nov: `v2` and `feat/*` removed from `vercel.json`, previews now follow Vercel's default except `chore/*`)
 - [x] **(me)** Vercel env vars: `GITHUB_TOKEN` (Production only), `GITHUB_USERNAME`, `WORK_ORG`, `GITHUB_DATA=live` (Production only), `AUTH_KEY_HASH` and `AUTH_COOKIE_SECRET` (Production and Preview, type Secret); framework preset Next.js
 - [x] **(me)** Merge `v2` into `main`; confirm the production deploy succeeds (PR #22, 29 Oct; the cache fix followed in PR #24, 30 Oct)
 - [x] **(me)** Production build log shows pnpm install (pnpm 12.x), Install Command empty, Node 24.x (pnpm 12.14.0, Install Command empty; Node 24.x is the project setting, not printed in the log)
@@ -186,7 +186,7 @@ tools → `/git-track` session logging + database → branch tracking and goals.
 
 Ideas that come up during the build go here instead of into the current task.
 
-- [x] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default) (done in 3.5: `.coderabbit.yaml`)
+- [x] Review `v2` PRs automatically: add a `.coderabbit.yaml` setting that includes `v2` as a base branch (CodeRabbit skips PRs that don't target `main` by default) (done in 3.5: `.coderabbit.yaml`) (retired 27 Nov: the file is deleted; PRs target `main`)
 - [ ] Replace vite-tsconfig-paths with resolve.tsconfigPaths: true in vitest.config.mts (removes the plugin and the deprecated tsconfck warning)
 - [ ] Upgrade ESLint 9 → 10 once eslint-config-next supports it
 - [ ] repo-watch alerts for GitTrack: decision pending (see MacBook checklist)
@@ -196,3 +196,5 @@ Ideas that come up during the build go here instead of into the current task.
 - [ ] 1Y range versus the live data window (found in the 3.5 CodeRabbit pass): live data covers 364 days but `rangeBounds("1y")` is 365 local days, so the oldest day of a 1Y view can undercount in live mode. Clip the 1Y bounds to `windowStart`, or test whether GitHub accepts a 365-day `contributionsCollection` (live run, mine) and widen `WINDOW_DAYS`
 - [ ] Empty heatmap hint always reads "Try a longer range, like 6 months" (odd at 6M and 1Y); show it only for Today, 1W and 1M after checking DESIGN.md §8
 - [x] braces advisory GHSA-vfj7-8cjw-p6xm (dev-only, via eslint-config-next): run pnpm audit --fix once a patched version ships (29 Oct: `pnpm audit` no longer reports it)
+- [x] Upgrade Next.js from 16.4.1 to 16.4.6: seven moderate advisories, and the build had stopped on Next's security check (PR #27, released as 2.0.1, 27 Nov)
+- [x] Retire the `v2` branch config: `v2` and `feat/*` removed from `vercel.json`, `.coderabbit.yaml` deleted, stale lines in the docs updated (27 Nov)
